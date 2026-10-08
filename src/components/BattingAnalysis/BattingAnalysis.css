@@ -1,0 +1,114 @@
+.scorecard {
+  --line: #7d8a86;
+  --hair: #c9cfe0;
+  --stripe: #dfe5e3;
+  --paper: #f4f4fb;
+  --row-h: 34px;
+
+  /* One template for the whole card. Rows inherit it via subgrid. */
+  display: grid;
+  grid-template-columns:
+    28px      /* # */
+    minmax(140px, 1.2fr) /* batsman */
+    34px 34px /* in / out */
+    minmax(240px, 4fr)   /* runs, wide ruled area */
+    28px      /* 4s/6s */
+    50px 50px /* balls/min 50, 100 */
+    50px      /* time in / balls rcd */
+    minmax(90px, 1fr)    /* how out */
+    minmax(90px, 1fr)    /* bowler */
+    56px;     /* total */
+  background: var(--paper);
+  border: 1px solid var(--line);
+  font: 12px/1.2 system-ui, sans-serif;
+  color: #444;
+  overflow-x: auto;
+}
+
+/* Header row, batsman rows and footer all share the parent's columns */
+.sc-row {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  min-height: var(--row-h);
+}
+
+.sc-cell {
+  border-left: 1px solid var(--line);
+  padding: 2px 4px;
+  display: flex;
+  align-items: center;
+}
+.sc-cell:first-child { border-left: 0; }
+
+/* Header */
+.sc-head { border-bottom: 1px solid var(--line); min-height: 40px; }
+.sc-head .sc-cell { justify-content: center; text-align: center; font-size: 11px; }
+
+/* Batsman rows: zebra striping without extra markup */
+.sc-body:nth-of-type(even) { background: var(--stripe); }
+.sc-body { border-bottom: 1px solid var(--hair); }
+.sc-body .sc-num { justify-content: center; color: #8a94b0; }
+
+/* Stacked cells: two halves separated by a hairline (used in body and header) */
+.sc-stack {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr); /* full-width column; the header's justify-content:center would otherwise shrink it */
+  align-items: stretch; /* .sc-cell sets align-items:center, which would shrink the halves */
+  padding: 0;
+}
+.sc-half {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  min-height: 0;
+}
+.sc-half + .sc-half { border-top: 1px solid var(--hair); }
+
+/* Grouped header cell: label on top, sub-labels underneath.
+   It is a subgrid, so its sub-columns are the exact same tracks as the body cells,
+   which keeps the vertical lines aligned. The left border lives on the children
+   because a subgrid's own border would inset its tracks by 1px. */
+.sc-group {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  padding: 0;
+  border-left: 0;
+}
+.sc-group-label {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid var(--line);
+}
+.sc-sub {
+  box-sizing: border-box;
+  justify-content: center;
+  padding: 0;
+  font-size: 10px;
+  border-top: 1px solid var(--hair); /* same position as .sc-half + .sc-half */
+}
+
+/* Fall of wickets footer */
+.sc-fow {
+  border-top: 1px solid var(--line);
+  min-height: 24px;
+  font-size: 11px;
+}
+.sc-fow-label { grid-column: 1 / 5; padding-left: 8px; }
+.sc-fow-cells {
+  grid-column: 5 / -1;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+}
+.sc-fow-cells span {
+  border-left: 1px solid var(--hair);
+  padding: 4px;
+  text-align: center;
+}

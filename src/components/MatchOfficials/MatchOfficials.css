@@ -1,0 +1,54 @@
+.match-officials {
+  --line: #7d8a86;
+  --hair: #c9cfe0;
+  --paper: #f4f4fb;
+  --label-w: 96px;
+  --row-h: 44px;
+
+  /* One template for the card. Every row inherits it via subgrid. */
+  display: grid;
+  grid-template-columns: var(--label-w) minmax(160px, 1fr);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  font: 11px/1.2 system-ui, sans-serif;
+  color: #444;
+}
+
+.mo-row {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  min-height: var(--row-h);
+  border-bottom: 1px solid var(--hair);
+}
+.mo-row:last-child { border-bottom: 0; }
+.mo-compact { min-height: 28px; }
+
+.mo-cell { padding: 4px 8px; display: flex; }
+
+.mo-label {
+  align-items: center;
+  font-size: 12px;
+  border-right: 1px solid var(--line);
+}
+
+/* Fields stack and share the row height, so Capts. gets two evenly spaced lines */
+.mo-fields {
+  flex-direction: column;
+  justify-content: space-evenly;
+  gap: 4px;
+}
+
+.mo-field {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.mo-field-label { font-size: 9px; color: #666; min-width: 28px; }
+
+/* The ruled line: the name sits on it, and it stays visible when empty */
+.mo-line {
+  flex: 1;
+  min-height: 1.4em;
+  border-bottom: 1px solid var(--hair);
+}

@@ -1,0 +1,38 @@
+.notes-remarks {
+  --line: #7d8a86;
+  --hair: #c9cfe0;
+  --paper: #f4f4fb;
+  --label-w: 110px;
+
+  /* Label on the left, ruled area filling the rest. Stretches to match a neighbour's height. */
+  display: grid;
+  grid-template-columns: var(--label-w) minmax(0, 1fr);
+  min-height: 34px;
+  min-width: 0;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  font: 12px/1.2 system-ui, sans-serif;
+  color: #444;
+}
+
+.nr-cell {
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.nr-label {
+  font-size: 12px;
+  font-weight: 600;
+  border-right: 1px solid var(--line);
+}
+
+/* The ruled line sits at the bottom of the cell, like a line to write on */
+.nr-field { align-items: flex-end; }
+.nr-value {
+  flex: 1;
+  min-width: 0;
+  min-height: 1.4em;
+  border-bottom: 1px solid var(--hair);
+}

@@ -1,0 +1,34 @@
+.container {
+  display: flex;
+  height: 100%;
+}
+.item {
+  flex-grow: 1;
+}
+
+.lhs {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+.fow-and-score {
+  display: flex;
+  /* flex-direction: row; */
+  flex-grow: 1;
+}
+
+.fow-and-score > :first-child { flex: 3; }
+.fow-and-score > :last-child  { flex: 2; }
+.tracker-row { display: flex; }
+.tracker-row > * { flex: 0 0 auto; }            /* keep natural width */
+.tracker-row > .grow {
+  flex: 1;                                      /* take the leftover width */
+  min-width: 0;                                 /* let it shrink instead of overflowing */
+  display: flex;                                /* so its child can fill the height */
+}
+.tracker-row > .grow > * { flex: 1; }           /* the tracker fills the wrapper */
+
+.result-row { display: flex; }
+.result-row > * { min-width: 0; }
+.result-row > :first-child { flex: 2; }
+.result-row > :last-child  { flex: 3; }

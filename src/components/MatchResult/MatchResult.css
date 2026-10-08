@@ -1,0 +1,49 @@
+.match-result {
+  --line: #7d8a86;
+  --hair: #c9cfe0;
+  --paper: #f4f4fb;
+  --row-h: 34px;
+  --label-w: 96px;
+
+  /* One template for both lines. Each row inherits it via subgrid. */
+  display: grid;
+  grid-template-columns: var(--label-w) repeat(2, minmax(0, 1fr));
+  background: var(--paper);
+  border: 1px solid var(--line);
+  font: 12px/1.2 system-ui, sans-serif;
+  color: #444;
+}
+
+.mr-row {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  min-height: var(--row-h);
+  border-bottom: 1px solid var(--hair);
+}
+.mr-row:last-child { border-bottom: 0; }
+
+.mr-cell {
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.mr-label {
+  font-size: 12px;
+  font-weight: 600;
+  border-right: 1px solid var(--line);
+}
+
+/* A row with a single field (Result) stretches it across both value columns */
+.mr-row > .mr-field:nth-child(2):last-child { grid-column: 2 / -1; }
+
+.mr-value {
+  flex: 1;
+  min-width: 0;
+  min-height: 1.4em;
+  border-bottom: 1px solid var(--hair);
+}
+.mr-small { font-size: 11px; color: #666; white-space: nowrap; }

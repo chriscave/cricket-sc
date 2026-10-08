@@ -1,0 +1,66 @@
+.scoring-rate {
+  --line: #7d8a86;
+  --hair: #c9cfe0;
+  --stripe: #dfe5e3;
+  --paper: #f4f4fb;
+  --row-h: 22px;
+
+  /* One template for everything. The header group and every row inherit it via subgrid. */
+  display: inline-grid;
+  grid-template-columns: repeat(5, 36px);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  font: 11px/1.2 system-ui, sans-serif;
+  color: #444;
+}
+
+.sr-cell {
+  border-left: 1px solid var(--line);
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sr-cell:first-child { border-left: 0; }
+
+/* Header: "Scoring rate" on top, rotated column labels underneath */
+.sr-group {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-template-rows: 24px 84px;
+  border-bottom: 1px solid var(--line);
+}
+.sr-label {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+.sr-sub {
+  box-sizing: border-box;
+  padding: 0;
+  border-top: 1px solid var(--hair);
+}
+.sr-sub:nth-child(2) { border-left: 0; } /* first label column: no left line */
+.sr-sub span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg); /* read bottom to top, like the printed book */
+  font-size: 9px;
+  text-align: center;
+  line-height: 1.1;
+  max-height: 100%;
+}
+
+/* Body rows: the header is child 1, so odd children are overs 2, 4, 6... */
+.sr-row {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  height: var(--row-h);
+  border-bottom: 1px solid var(--hair);
+}
+.sr-row:last-child { border-bottom: 0; }
+.sr-row:nth-child(odd) { background: var(--stripe); }
+.sr-row .sr-cell:first-child { color: #8a94b0; font-size: 10px; }

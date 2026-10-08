@@ -1,0 +1,31 @@
+.run-tracker {
+  --line: #7d8a86;
+  --paper: #f4f4fb;
+  --row-h: 20px;
+
+  /* The number of columns comes from the `columns` prop. Numbers wrap into rows on their own. */
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  /* Rows are at least --row-h, and share any extra height if the card is stretched */
+  grid-template-rows: repeat(var(--rows), minmax(var(--row-h), 1fr));
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 6px 10px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  font: 10px/1 system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  color: #444;
+}
+
+.rt-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Scored runs: struck through and faded, like crossing them out in the book */
+.rt-done {
+  text-decoration: line-through;
+  color: #9aa3b8;
+}

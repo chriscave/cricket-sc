@@ -1,0 +1,45 @@
+.fall-of-wickets {
+  --line: #7d8a86;
+  --hair: #c9cfe0;
+  --stripe: #dfe5e3;
+  --paper: #f4f4fb;
+  --row-h: 30px;
+
+  /* One template for the whole card. Every row inherits it via subgrid. */
+  display: grid;
+  grid-template-columns: 150px repeat(10, minmax(48px, 1fr));
+  /* fixed header, then 5 rows that share whatever height the card is given */
+  grid-template-rows: 24px repeat(5, minmax(var(--row-h), 1fr));
+  background: var(--paper);
+  border: 1px solid var(--line);
+  font: 11px/1.2 system-ui, sans-serif;
+  color: #444;
+  overflow-x: auto;
+  min-width: 0; /* lets it shrink inside a flex row */
+}
+
+.fw-row {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  min-height: var(--row-h);
+  border-bottom: 1px solid var(--hair);
+}
+.fw-row:last-child { border-bottom: 0; }
+
+.fw-cell {
+  border-left: 1px solid var(--line);
+  padding: 2px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.fw-cell:first-child { border-left: 0; }
+
+.fw-head { min-height: 24px; border-bottom: 1px solid var(--line); }
+.fw-head .fw-cell { font-size: 11px; }
+
+/* The header is child 1, so odd children are the 2nd, 4th... body rows */
+.fw-body:nth-child(odd) { background: var(--stripe); }
+.fw-label { font-size: 10px; }

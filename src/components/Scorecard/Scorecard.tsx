@@ -137,6 +137,7 @@ const events: Events = [
       overNumber: 2,
       batRuns: 0,
       time: 1,
+      wicket: {batterOutId: 1, howOut: {kind: "bowled"}}
     },
   },
   {
@@ -144,7 +145,7 @@ const events: Events = [
     delivery: {
       overNumber: 2,
       batRuns: 0,
-      wicket: {batterOutId: 1, howOut: {kind: "bowled"}},
+      // wicket: {batterOutId: 1, howOut: {kind: "bowled"}},
       time: 1,
     },
   },

@@ -69,6 +69,7 @@
    centred. The column count and each ball's position are set inline (see ballPosition
    in BowlingAnalysis.tsx). */
 .ba-balls {
+  position: relative;
   display: grid;
   grid-template-rows: repeat(6, minmax(0, 1fr));
   place-items: center;
@@ -84,6 +85,20 @@
   width: 1.2em;
   height: 1.2em;
   max-width: 100%;
+}
+
+/* The maiden M covers the whole balls area, behind the marks (see MaidenMark.tsx).
+   Absolutely positioned so it doesn't affect the row height; it still uses its grid
+   area as its box, so it lines up with the balls. */
+.ba-maiden {
+  position: absolute;
+  inset: 0;
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
 }
 
 /* Grouped header: label on top, sub-labels under it.

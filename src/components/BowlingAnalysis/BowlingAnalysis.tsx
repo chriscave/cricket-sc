@@ -6,6 +6,7 @@ import DotMark from "./DotMark";
 import "./BowlingAnalysis.css";
 import type { ReactNode } from "react";
 import WicketMark from "./WicketMark";
+import MaidenMark from "./MaidenMark";
 
 const OVER_COUNT = 20;
 const OVERS = Array.from({ length: OVER_COUNT }, (_, i) => i);
@@ -142,7 +143,8 @@ export default function BowlingAnalysis({
             <div className="ba-cell">{row.action}</div>
 
             {OVERS.map((o) => {
-              const marks = row.oversAnalysis?.[o]?.deliveryMarks ?? [];
+              const over = row.oversAnalysis?.[o];
+              const marks = over?.deliveryMarks ?? [];
               const columns = ballColumns(marks.length);
               return (
               <div key={o} className="ba-cell ba-stack">
@@ -153,6 +155,7 @@ export default function BowlingAnalysis({
                     fontSize: ballFontSize(columns),
                   }}
                 >
+                  {over?.maiden && <MaidenMark marks={marks} />}
                   {marks.map((mark, b) => (
                     <span key={b} style={ballPosition(b, marks.length, columns)}>
                       {renderMark(mark)}

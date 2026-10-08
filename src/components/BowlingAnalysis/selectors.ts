@@ -13,6 +13,7 @@ export type Over = {
   cumRuns: number;
   cumWickets: number;
   complete: boolean;
+  maiden: boolean;
 };
 
 export type BowlerRow = {
@@ -74,21 +75,22 @@ export function selectBowlingsAnalysis(state: InningsState): BowlerRow[] {
         (d) => d.wicket && creditedToBowler(d.wicket.howOut),
       ).length;
 
+      const complete = overBalls[0].overNumber < state.overNumber;
       const over: Over = {
         deliveryMarks,
         cumRuns: (previousOver?.cumRuns ?? 0) + bowlerOverRuns,
         cumWickets: (previousOver?.cumWickets ?? 0) + bowlerWickets,
-        complete: overBalls[0].overNumber < state.overNumber,
+        complete,
+        maiden:
+          complete &&
+          deliveryMarks.every(
+            (dm) =>
+              dm.batRuns + (dm.extras?.wides ?? 0) + (dm.extras?.noBalls ?? 0) ===
+              0,
+          ),
       };
       overs.push(over);
     }
-
-    const isMaiden = (over: Over) =>
-      over.deliveryMarks.every(
-        (dm) =>
-          dm.batRuns + (dm.extras?.wides ?? 0) + (dm.extras?.noBalls ?? 0) ===
-          0,
-      ) && over.complete;
 
     const last = overs.at(-1);
     const runs = last?.cumRuns ?? 0;
@@ -104,7 +106,7 @@ export function selectBowlingsAnalysis(state: InningsState): BowlerRow[] {
       completedOvers: overs.filter((o) => o.complete).length,
       deliveriesInCurrentOver:
         currentOver?.deliveryMarks.filter((dm) => dm.isLegal).length ?? 0,
-      mdns: overs.filter((over) => isMaiden(over)).length,
+      mdns: overs.filter((over) => over.maiden).length,
       runs,
       wkts,
       avrge,

@@ -1,8 +1,11 @@
 import type { BowlerRow, DeliveryMark, Over } from "./selectors";
 import WideMark from "./WideMark";
 import NoBallMark from "./NoBallMark";
+import ByeMark from "./ByeMark";
+import DotMark from "./DotMark";
 import "./BowlingAnalysis.css";
 import type { ReactNode } from "react";
+import WicketMark from "./WicketMark";
 
 const OVER_COUNT = 20;
 const OVERS = Array.from({ length: OVER_COUNT }, (_, i) => i);
@@ -56,7 +59,12 @@ function formatOvers(completed = 0, balls = 0): string {
  function renderMark(mark: DeliveryMark): ReactNode {
     if (mark.extras?.wides) return <WideMark mark={mark} />;
     if (mark.extras?.noBalls) return <NoBallMark mark={mark} />;
-    return "1";
+    if (mark.extras?.byes) return <ByeMark kind="bye" />;
+    if (mark.extras?.legByes) return <ByeMark kind="legBye" />;
+    if (mark.bowlerWicket) return <WicketMark kind="bowler" />;
+    if (mark.runOut) return <WicketMark kind="runOut" />;
+    if (mark.batRuns === 0) return <DotMark />;
+    return mark.batRuns;
   }
 
 
@@ -90,10 +98,10 @@ function ballColumns(ballCount: number): number {
   return Math.max(2, Math.ceil(ballCount / 3));
 }
 
-// Up to 4 columns fit at the normal 9px. Beyond that (13+ balls, very rare) shrink the
+// Up to 4 columns fit at the normal 13px. Beyond that (13+ balls, very rare) shrink the
 // marks in proportion so they get smaller rather than overlapping the next column.
 function ballFontSize(columns: number): string | undefined {
-  return columns > 4 ? `${(9 * 4) / columns}px` : undefined;
+  return columns > 4 ? `${(13 * 4) / columns}px` : undefined;
 }
 
 function ballPosition(ball: number, ballCount: number, columns: number) {

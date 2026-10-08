@@ -36,7 +36,7 @@ export default function NoBallMark({ mark }: { mark: DeliveryMark }) {
         </text>
       ) : (
         dots.map(([x, y], i) => (
-          <circle key={i} cx={x} cy={y} r="0.8" fill="currentColor" />
+          <circle key={i} cx={x} cy={y} r="1.1" fill="currentColor" />
         ))
       )}
     </svg>

@@ -1,4 +1,5 @@
 import type { DeliveryMark } from "./selectors";
+import MarkLetter from "./MarkLetter";
 
 // Quadrant centres of the cross, in fill order: top-left, top-right, bottom-left,
 // bottom-right.
@@ -14,10 +15,10 @@ const CORNERS = [
 // first corner left free after the dots.
 export default function WideMark({ mark }: { mark: DeliveryMark }) {
   const extraWides = Math.max(0, (mark.extras?.wides ?? 1) - 1);
-  const corners = [
-    ...(mark.bowlerWicket ? ["W"] : []),
-    ...Array<string>(extraWides).fill("dot"),
-    ...(mark.runOut ? ["R"] : []),
+  const corners: ("W" | "R" | "dot")[] = [
+    ...(mark.bowlerWicket ? (["W"] as const) : []),
+    ...Array<"dot">(extraWides).fill("dot"),
+    ...(mark.runOut ? (["R"] as const) : []),
   ].slice(0, CORNERS.length);
 
   return (
@@ -26,19 +27,9 @@ export default function WideMark({ mark }: { mark: DeliveryMark }) {
       {corners.map((c, i) => {
         const [x, y] = CORNERS[i];
         return c === "dot" ? (
-          <circle key={i} cx={x} cy={y} r="1" fill="currentColor" />
+          <circle key={i} cx={x} cy={y} r="1.4" fill="currentColor" />
         ) : (
-          <text
-            key={i}
-            x={x}
-            y={y}
-            fontSize="5"
-            textAnchor="middle"
-            dominantBaseline="central"
-            fill="currentColor"
-          >
-            {c}
-          </text>
+          <MarkLetter key={i} letter={c} x={x} y={y} size={5} />
         );
       })}
     </svg>

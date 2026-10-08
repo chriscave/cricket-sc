@@ -3,7 +3,7 @@
   --hair: #c9cfe0;
   --stripe: #dfe5e3;
   --paper: #f4f4fb;
-  --row-h: 52px;
+  --row-h: 72px;
 
   /* One template for the whole card. Rows and header groups inherit it via subgrid. */
   display: grid;
@@ -73,7 +73,7 @@
   grid-template-rows: repeat(6, minmax(0, 1fr));
   place-items: center;
   padding: 1px 2px;
-  font-size: 9px;
+  font-size: 13px;
   line-height: 1;
 }
 

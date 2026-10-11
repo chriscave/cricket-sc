@@ -192,7 +192,11 @@ function useFitToWidth(ref: RefObject<HTMLElement | null>): number {
   return zoom;
 }
 
-export default function Scorecard() {
+type ScorecardProps = {
+  inningsState: InningsState
+}
+
+export default function Scorecard({inningsState: state}: ScorecardProps) {
   const sheet = useRef<HTMLDivElement>(null);
   const zoom = useFitToWidth(sheet);
   return (

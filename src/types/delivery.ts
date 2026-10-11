@@ -33,6 +33,7 @@ export interface DeliveryInput {
   batRuns?: number;
   extras?: Extras;
   wicket?: Wicket;
+  time: number;
 }
 
 // export interface DeliveryContext {
@@ -67,9 +68,37 @@ export interface InningsState {
   bowlers: Record<number, { deliveryIds: number[] }>;
   overNumber: number;
   currentBowlerId: number;
-  strikerId?: number;
-  nonStrikerId?: number;
+  strikerId: number | null;
+  nonStrikerId: number | null;
   penalties?: number[];
+}
+
+// type ValidationResult = { valid: true } | { valid: false; errors: string[] };
+
+// export function validateDeliveryInput(input: DeliveryInput): ValidationResult {
+//   const errors: string[] = []
+// }
+
+export function input2Event(
+  input: DeliveryInput,
+  state: InningsState,
+): MatchEvent {
+  const delivery: Delivery = {
+    overNumber: state.overNumber,
+    batRuns: input.batRuns ?? 0,
+    extras: input.extras, // undefined if the input had no extras
+    wicket: input.wicket, // undefined if the input had no wicket
+    time: input.time,
+  };
+  return { type: "deliveryBowled", delivery };
+}
+
+export function applyInput(
+  state: InningsState,
+  input: DeliveryInput,
+): InningsState {
+  const matchEvent = input2Event(input, state);
+  return apply(state, matchEvent);
 }
 
 export function apply(
@@ -88,18 +117,30 @@ export function apply(
     // current: state.current,
   };
   if (matchEvent.type === "deliveryBowled") {
-    nextState.deliveries.push(matchEvent.delivery);
-    const deliveryId = nextState.deliveries.length - 1;
+    const deliveryId = state.deliveries.length;
+    nextState.deliveries = [...state.deliveries, matchEvent.delivery];
     const bowlerId = state.currentBowlerId;
 
     // const bowlerId = matchEvent.delivery.bowlerId;
     const strikerId = state.strikerId;
     const nonStrikerId = state.nonStrikerId;
-
+    if (strikerId === null || nonStrikerId === null) {
+      throw new Error("innings is over: no batters at the crease");
+    }
     // const strikerId = matchEvent.delivery.strikerId;
     // const nonStrikerId = matchEvent.delivery.nonStrikerId;
-    nextState.batters[strikerId].deliveryIds.push(deliveryId);
-    nextState.bowlers[bowlerId].deliveryIds.push(deliveryId);
+    nextState.batters = {
+      ...state.batters,
+      [strikerId]: {
+        deliveryIds: [...state.batters[strikerId].deliveryIds, deliveryId],
+      },
+    };
+    nextState.bowlers = {
+      ...state.bowlers,
+      [bowlerId]: {
+        deliveryIds: [...state.bowlers[bowlerId].deliveryIds, deliveryId],
+      },
+    };
 
     const byes = matchEvent.delivery.extras?.byes ?? 0;
     const legByes = matchEvent.delivery.extras?.legByes ?? 0;
@@ -119,19 +160,11 @@ export function apply(
     }
     if (matchEvent.delivery.wicket) {
       const batterOutId = matchEvent.delivery.wicket.batterOutId;
-      const highestbatterID = Math.max(
-        nextState.strikerId,
-        nextState.nonStrikerId,
-      );
-      if (highestbatterID === 11) {
-        nextState.strikerId = null;
-        nextState.nonStrikerId = null;
-      } else {
-        const batterInId = highestbatterID + 1;
-        nextState.strikerId === batterOutId
-          ? (nextState.strikerId = batterInId)
-          : (nextState.nonStrikerId = batterInId);
-      }
+      const highestbatterID = Math.max(strikerId, nonStrikerId);
+      const nextBatterId = highestbatterID <= 11 ? highestbatterID + 1 : null;
+      nextState.strikerId === batterOutId
+        ? (nextState.strikerId = nextBatterId)
+        : (nextState.nonStrikerId = nextBatterId);
     }
   }
   if (matchEvent.type === "endOver") {
@@ -145,99 +178,8 @@ export function apply(
     nextState.nonStrikerId = nonStrikerId;
   }
   if (matchEvent.type === "penaltyRunsAwarded") {
-    nextState.penalties
-      ? nextState.penalties.push(matchEvent.runs)
-      : (nextState.penalties = [matchEvent.runs]);
+    nextState.penalties = [...(state.penalties ?? []), matchEvent.runs];
   }
 
   return nextState;
 }
-
-// Over
-// Dot ball
-// const event1: MatchEvent = {
-//   type: "deliveryBowled",
-//   delivery: { overNumber: 1, bowlerId: 1, strikerId: 1, batRuns: 0, time: 1 },
-// };
-// const state1: InningsState = {
-//   deliveries: [
-//     { overNumber: 1, bowlerId: 1, strikerId: 1, batRuns: 0, time: 1 },
-//   ],
-//   batters: { 1: { deliveryIds: [0] } },
-//   bowlers: { 1: { deliveryIds: [0] } },
-//   current: {
-//     overNumber: 1,
-//     bowlerId: 1,
-//     strikerId: 1,
-//     nonStrikerId: 2,
-//   },
-// };
-
-// // Single
-// const event2: MatchEvent = {
-//   type: "deliveryBowled",
-//   delivery: { overNumber: 1, bowlerId: 1, strikerId: 1, batRuns: 1, time: 1 },
-// };
-// const state2: InningsState = {
-//   deliveries: [
-//     { overNumber: 1, bowlerId: 1, strikerId: 1, batRuns: 0, time: 1 },
-//     { overNumber: 1, bowlerId: 1, strikerId: 1, batRuns: 1, time: 1 },
-//   ],
-//   batters: { 1: { deliveryIds: [0, 1] } },
-//   bowlers: { 1: { deliveryIds: [0, 1] } },
-//   current: {
-//     overNumber: 1,
-//     bowlerId: 1,
-//     strikerId: 2,
-//     nonStrikerId: 1,
-//   },
-// };
-
-// // Wicket
-// const event3: MatchEvent = {
-//   type: "deliveryBowled",
-//   delivery: {
-//     overNumber: 1,
-//     bowlerId: 1,
-//     strikerId: 1,
-//     batRuns: 1,
-//     time: 1,
-//     wicket: { batterOutId: 2, howOut: { kind: "bowled" } },
-//   },
-// };
-// const state3: InningsState = {
-//   deliveries: [
-//     { overNumber: 1, bowlerId: 1, strikerId: 1, batRuns: 0, time: 1 },
-//     { overNumber: 1, bowlerId: 1, strikerId: 1, batRuns: 1, time: 1 },
-//     {
-//       overNumber: 1,
-//       bowlerId: 1,
-//       strikerId: 2,
-//       batRuns: 1,
-//       time: 1,
-//       wicket: { batterOutId: 2, howOut: { kind: "bowled" } },
-//     },
-//   ],
-//   // score: {batterRuns: 1, wickets: 1, extras: {fieldingExtras: 1, bowlingExtras: 0}, grandTotal: 1}
-//   batters: { 1: { deliveryIds: [0, 1, 2] } },
-//   bowlers: { 1: { deliveryIds: [0, 1] }, 2: { deliveryIds: [2] } },
-//   current: {
-//     overNumber: 1,
-//     bowlerId: 1,
-//     strikerId: 3,
-//     nonStrikerId: 1,
-//   },
-// };
-
-// // Extra
-// const event4: MatchEvent = {
-//   type: "deliveryBowled",
-//   delivery: {
-//     overNumber: 1,
-//     bowlerId: 1,
-//     strikerId: 1,
-//     batRuns: 1,
-//     time: 1,
-//     extras: { wides: 1 },
-//   },
-// };

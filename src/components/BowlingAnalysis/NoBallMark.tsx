@@ -15,9 +15,7 @@ const DOTS = [
 // bat (extra no balls run, byes, leg byes) go inside as one dot each.
 export default function NoBallMark({ mark }: { mark: DeliveryMark }) {
   const extraRuns =
-    Math.max(0, (mark.extras?.noBalls ?? 1) - 1) +
-    (mark.extras?.byes ?? 0) +
-    (mark.extras?.legByes ?? 0);
+    Math.max(0, mark.extras.noBalls - 1) + mark.extras.byes + mark.extras.legByes;
   const dots = DOTS[Math.min(extraRuns, DOTS.length - 1)];
 
   return (

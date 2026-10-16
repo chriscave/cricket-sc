@@ -1,9 +1,15 @@
-import type { Delivery, Extras, HowOut, InningsState } from "@/types/delivery";
+import {
+  isLegal,
+  type Delivery,
+  type Extras,
+  type HowOut,
+  type InningsState,
+} from "@/types/delivery";
 
 export type DeliveryMark = {
   isLegal: boolean;
   batRuns: number;
-  extras?: Extras;
+  extras: Extras;
   bowlerWicket: boolean;
   runOut: boolean;
 };
@@ -34,10 +40,8 @@ const creditedToBowler = (h: HowOut) =>
   h.kind !== "runOut" && h.kind !== "timedOut";
 
 function toDeliveryMark(d: Delivery): DeliveryMark {
-  const isLegal =
-    (d.extras?.wides ? false : true) && (d.extras?.noBalls ? false : true);
   return {
-    isLegal,
+    isLegal: isLegal(d),
     batRuns: d.batRuns,
     extras: d.extras,
     bowlerWicket: !!d.wicket && creditedToBowler(d.wicket.howOut),
@@ -68,7 +72,7 @@ export function selectBowlingsAnalysis(state: InningsState): BowlerRow[] {
       const previousOver = overs.at(-1);
       const bowlerOverRuns = overBalls
         .map(
-          (d) => d.batRuns + (d.extras?.noBalls ?? 0) + (d.extras?.wides ?? 0),
+          (d) => d.batRuns + d.extras.noBalls + d.extras.wides,
         )
         .reduce((prev, curr) => prev + curr, 0);
       const bowlerWickets = overBalls.filter(
@@ -85,8 +89,7 @@ export function selectBowlingsAnalysis(state: InningsState): BowlerRow[] {
           complete &&
           deliveryMarks.every(
             (dm) =>
-              dm.batRuns + (dm.extras?.wides ?? 0) + (dm.extras?.noBalls ?? 0) ===
-              0,
+              dm.batRuns + dm.extras.wides + dm.extras.noBalls === 0,
           ),
       };
       overs.push(over);
@@ -101,8 +104,8 @@ export function selectBowlingsAnalysis(state: InningsState): BowlerRow[] {
 
     const row: BowlerRow = {
       oversAnalysis: overs,
-      wds: allMarks.reduce((s, dm) => s + (dm.extras?.wides ?? 0), 0),
-      nb: allMarks.reduce((s, dm) => s + (dm.extras?.noBalls ?? 0), 0),
+      wds: allMarks.reduce((s, dm) => s + dm.extras.wides, 0),
+      nb: allMarks.reduce((s, dm) => s + dm.extras.noBalls, 0),
       completedOvers: overs.filter((o) => o.complete).length,
       deliveriesInCurrentOver:
         currentOver?.deliveryMarks.filter((dm) => dm.isLegal).length ?? 0,

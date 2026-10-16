@@ -14,7 +14,7 @@ const CORNERS = [
 // (stumped, hit wicket) puts a W in the first corner; a run out puts an R in the
 // first corner left free after the dots.
 export default function WideMark({ mark }: { mark: DeliveryMark }) {
-  const extraWides = Math.max(0, (mark.extras?.wides ?? 1) - 1);
+  const extraWides = Math.max(0, mark.extras.wides - 1);
   const corners: ("W" | "R" | "dot")[] = [
     ...(mark.bowlerWicket ? (["W"] as const) : []),
     ...Array<"dot">(extraWides).fill("dot"),

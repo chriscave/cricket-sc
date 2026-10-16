@@ -2,7 +2,18 @@ import { useState } from "react";
 import "./App.css";
 import Scorecard from "@/components/Scorecard";
 import CommandLine from "./components/CommandLine";
-import { applyInput, type DeliveryInput, type InningsState } from "./types/delivery";
+import NextBowlers from "@/components/NextBowlers";
+import {
+  apply,
+  applyInput,
+  bowlersUsed,
+  currentOverDeliveries,
+  hasSixLegalDeliveries,
+  otherEndBowlerId,
+  previousDeliveryBowlerId,
+  type DeliveryInput,
+  type InningsState,
+} from "./types/delivery";
 
 const initialInnings: InningsState = {
   deliveries: [],
@@ -40,11 +51,28 @@ const initialInnings: InningsState = {
 
 function App() {
   const [innings, setInnings] = useState<InningsState>(initialInnings)
+  const sixLegalDeliveries = hasSixLegalDeliveries(currentOverDeliveries(innings));
   const handleInput = (input: DeliveryInput) => setInnings((prev) => applyInput(prev, input)) 
+  const handleNextBowler = (nextBowlerId: number) => setInnings((prev) => apply(prev, { type: "endOver", nextBowlerId}))
+  const usedBowlers = bowlersUsed(innings)
+  const bowlerOfPreviousDelivery = previousDeliveryBowlerId(innings)
+  const bowlerAtOtherEnd = otherEndBowlerId(innings)
+
   return (
     <>
-      <Scorecard />
-      <CommandLine onInput={handleInput}/>
+      <div className="app">
+        <Scorecard inningsState={innings}/>
+      </div>
+      <CommandLine onInput={handleInput}>
+        {sixLegalDeliveries && (
+          <NextBowlers
+            usedBowlers={usedBowlers}
+            bowlerOfPreviousDelivery={bowlerOfPreviousDelivery}
+            bowlerAtOtherEnd={bowlerAtOtherEnd}
+            onSelect={handleNextBowler}
+          />
+        )}
+      </CommandLine>
     </>
   );
 }

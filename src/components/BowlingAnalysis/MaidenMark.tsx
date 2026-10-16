@@ -35,7 +35,8 @@ export default function MaidenMark({ marks }: { marks: DeliveryMark[] }) {
       <mask id={mask}>
         <rect width="100%" height="100%" fill="white" />
         {marks.slice(0, BALLS.length).map((m, i) => {
-          const isDot = !m.extras && !m.bowlerWicket && !m.runOut;
+          const isDot =
+            m.isLegal && !m.extras.byes && !m.extras.legByes && !m.bowlerWicket && !m.runOut;
           if (isDot) return null;
           const [cx, cy] = BALLS[i];
           return <circle key={i} cx={cx} cy={cy} r="0.5em" fill="black" />;

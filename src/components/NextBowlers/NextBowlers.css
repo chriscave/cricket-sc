@@ -1,0 +1,28 @@
+/* The bar's colours swapped, like a tmux menu. --cl-bg and --cl-fg come from the
+   command line's .cl-dock, which this is always shown inside. */
+.next-bowlers {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 12px;
+  background: var(--cl-fg);
+  color: var(--cl-bg);
+}
+.next-bowlers:focus {
+  outline: none; /* the highlighted bowler shows where the focus is */
+}
+.nb-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.nb-list li {
+  padding: 2px 6px;
+}
+.nb-list li.selected {
+  background: var(--cl-bg);
+  color: var(--cl-fg);
+}

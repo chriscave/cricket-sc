@@ -4,7 +4,8 @@ import { validateDeliveryInput, type DeliveryInput } from "@/types/delivery";
 import { parseText } from "./parseText";
 
 type CommandLineProps = {
-  onInput: (input: DeliveryInput) => void;
+  // needsHowOut: the ball took a wicket and how the batter was out is still to be chosen.
+  onInput: (input: DeliveryInput, needsHowOut: boolean) => void;
   // Shown under the bar, e.g. the next-bowler list. It takes the focus while it's
   // shown, and the text box gets it back when it goes.
   children?: ReactNode;
@@ -39,7 +40,7 @@ export default function CommandLine({ onInput, children }: CommandLineProps) {
             return;
           }
 
-          onInput(parsed.input);
+          onInput(parsed.input, parsed.needsHowOut);
           setErrors([]);
           setText("");
         }}

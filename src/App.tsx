@@ -14,6 +14,9 @@ import {
   type DeliveryInput,
   type InningsState,
 } from "./types/delivery";
+import BowlerWicketHowOut, {
+  type BowlerWicketKind,
+} from "./components/BowlerWicketHowOut/BowlerWicketHowOut";
 
 // TODO:
 // Add wickets to command line input
@@ -54,8 +57,24 @@ const initialInnings: InningsState = {
 
 function App() {
   const [innings, setInnings] = useState<InningsState>(initialInnings)
+  // A ball that took a wicket, waiting for the scorer to choose how the batter was out.
+  // It isn't recorded until then.
+  const [pendingWicket, setPendingWicket] = useState<DeliveryInput | null>(null);
   const sixLegalDeliveries = hasSixLegalDeliveries(currentOverDeliveries(innings));
   const handleInput = (input: DeliveryInput) => setInnings((prev) => applyInput(prev, input)) 
+  const handleCommand = (input: DeliveryInput, needsHowOut: boolean) =>
+    needsHowOut ? setPendingWicket(input) : handleInput(input);
+  // Bowler's wickets always dismiss the striker.
+  const handleHowOut = (kind: BowlerWicketKind) => {
+    if (!pendingWicket || innings.strikerId === null) return;
+    // TODO: validate the finished ball (e.g. no stumping off a no ball) once wickets
+    // can be combined with extras.
+    handleInput({
+      ...pendingWicket,
+      wicket: { batterOutId: innings.strikerId, howOut: { kind } },
+    });
+    setPendingWicket(null);
+  };
   const handleNextBowler = (nextBowlerId: number) => setInnings((prev) => apply(prev, { type: "endOver", nextBowlerId}))
   const usedBowlers = bowlersUsed(innings)
   const bowlerOfPreviousDelivery = previousDeliveryBowlerId(innings)
@@ -66,14 +85,21 @@ function App() {
       <div className="app">
         <Scorecard inningsState={innings}/>
       </div>
-      <CommandLine onInput={handleInput}>
-        {sixLegalDeliveries && (
-          <NextBowlers
-            usedBowlers={usedBowlers}
-            bowlerOfPreviousDelivery={bowlerOfPreviousDelivery}
-            bowlerAtOtherEnd={bowlerAtOtherEnd}
-            onSelect={handleNextBowler}
+      <CommandLine onInput={handleCommand}>
+        {pendingWicket ? (
+          <BowlerWicketHowOut
+            onSelect={handleHowOut}
+            onCancel={() => setPendingWicket(null)}
           />
+        ) : (
+          sixLegalDeliveries && (
+            <NextBowlers
+              usedBowlers={usedBowlers}
+              bowlerOfPreviousDelivery={bowlerOfPreviousDelivery}
+              bowlerAtOtherEnd={bowlerAtOtherEnd}
+              onSelect={handleNextBowler}
+            />
+          )
         )}
       </CommandLine>
     </>

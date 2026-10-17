@@ -1,4 +1,3 @@
-import "./NextBowlers.css";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 
 // The bowlers who could bowl the next over, shown under the command line at the end
@@ -52,14 +51,14 @@ export default function NextBowlers({
   return (
     <div
       ref={list}
-      className="next-bowlers"
+      className="cl-panel"
       tabIndex={0}
       onKeyDown={handleKeyDown}
       role="listbox"
       aria-label="Next bowler"
     >
-      <span className="nb-title">Next bowler (← → Enter):</span>
-      <ul className="nb-list">
+      <span>Next bowler (← → Enter):</span>
+      <ul className="cl-panel-list">
         {bowlers.map((b, i) => (
           <li
             key={b.id}

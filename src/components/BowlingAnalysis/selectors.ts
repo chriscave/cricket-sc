@@ -1,8 +1,8 @@
 import {
+  creditedToBowler,
   isLegal,
   type Delivery,
   type Extras,
-  type HowOut,
   type InningsState,
 } from "@/types/delivery";
 
@@ -36,9 +36,6 @@ export type BowlerRow = {
   wkts: number;
   avrge?: number;
 };
-const creditedToBowler = (h: HowOut) =>
-  h.kind !== "runOut" && h.kind !== "timedOut";
-
 function toDeliveryMark(d: Delivery): DeliveryMark {
   return {
     isLegal: isLegal(d),

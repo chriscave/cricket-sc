@@ -3,7 +3,7 @@ import type { DeliveryInput } from "@/types/delivery";
 import { parseText } from "./parseText";
 
 const parsesTo = (text: string, input: DeliveryInput) =>
-  expect(parseText(text)).toEqual({ ok: true, input });
+  expect(parseText(text)).toEqual({ ok: true, input, needsHowOut: false });
 const fails = (text: string) => expect(parseText(text).ok).toBe(false);
 
 describe("parseText", () => {
@@ -18,12 +18,11 @@ describe("parseText", () => {
   });
 
   describe("wickets", () => {
-    it.each(["w", "W"])("%s is a bowled wicket", (text) =>
+    it.each(["w", "W"])("%s is a wicket still needing how out", (text) =>
       expect(parseText(text)).toEqual({
         ok: true,
-        input: expect.objectContaining({
-          wicket: expect.objectContaining({ howOut: { kind: "bowled" } }),
-        }),
+        input: { batRuns: 0 },
+        needsHowOut: true,
       }));
   });
 

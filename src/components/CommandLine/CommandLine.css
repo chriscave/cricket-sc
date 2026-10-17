@@ -43,3 +43,32 @@
   color: var(--cl-fg);
   opacity: 0.5;
 }
+
+/* Panels shown under the bar (next bowler, how out): the bar's colours swapped, like
+   a tmux menu. Picked with the keyboard, so the highlighted item shows the focus. */
+.cl-panel {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 12px;
+  background: var(--cl-fg);
+  color: var(--cl-bg);
+}
+.cl-panel:focus {
+  outline: none;
+}
+.cl-panel-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cl-panel-list li {
+  padding: 2px 6px;
+}
+.cl-panel-list li.selected {
+  background: var(--cl-bg);
+  color: var(--cl-fg);
+}

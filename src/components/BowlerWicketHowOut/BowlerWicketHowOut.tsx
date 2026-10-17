@@ -1,0 +1,63 @@
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import type { HowOut } from "@/types/delivery";
+
+// Dismissals credited to the bowler. Run outs and timed out aren't chosen here.
+export type BowlerWicketKind = Exclude<HowOut["kind"], "runOut" | "timedOut">;
+
+const KINDS: { kind: BowlerWicketKind; label: string }[] = [
+  { kind: "bowled", label: "Bowled" },
+  { kind: "caught", label: "Caught" },
+  { kind: "lbw", label: "LBW" },
+  { kind: "stumped", label: "Stumped" },
+  { kind: "hitWicket", label: "Hit wicket" },
+];
+
+// How the batter was out, chosen after a wicket is entered. It takes the focus when
+// it appears: ← and → choose, Enter confirms, Esc cancels the wicket.
+type BowlerWicketHowOutProps = {
+  onSelect: (kind: BowlerWicketKind) => void;
+  onCancel: () => void;
+};
+
+export default function BowlerWicketHowOut({ onSelect, onCancel }: BowlerWicketHowOutProps) {
+  const [selected, setSelected] = useState(0);
+
+  const list = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    list.current?.focus();
+  }, []);
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "ArrowLeft") setSelected(Math.max(0, selected - 1));
+    else if (e.key === "ArrowRight") setSelected(Math.min(KINDS.length - 1, selected + 1));
+    else if (e.key === "Enter") onSelect(KINDS[selected].kind);
+    else if (e.key === "Escape") onCancel();
+    else return;
+    e.preventDefault();
+  };
+
+  return (
+    <div
+      ref={list}
+      className="cl-panel"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      role="listbox"
+      aria-label="How out"
+    >
+      <span>How out (← → Enter, Esc to cancel):</span>
+      <ul className="cl-panel-list">
+        {KINDS.map((k, i) => (
+          <li
+            key={k.kind}
+            role="option"
+            aria-selected={i === selected}
+            className={i === selected ? "selected" : undefined}
+          >
+            {k.label}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}

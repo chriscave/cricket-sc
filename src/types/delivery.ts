@@ -12,8 +12,8 @@ export type HowOut =
   | { kind: "lbw" }
   | { kind: "hitWicket" }
   | { kind: "timedOut" }
-  | { kind: "caught"; fielder: string }
-  | { kind: "stumped"; keeper: string }
+  | { kind: "caught"; fielder?: string }
+  | { kind: "stumped"; keeper?: string }
   | { kind: "runOut"; fielder?: string };
 
 export interface Wicket {
@@ -155,6 +155,16 @@ export const currentOverDeliveries = (state: InningsState) =>
 // the umpire miscounts, so this doesn't mean the over has ended.
 export const hasSixLegalDeliveries = (over: Delivery[]) =>
   over.filter(isLegal).length >= 6;
+
+// Wickets credited to the bowler: everything except run outs and timed out.
+export const creditedToBowler = (h: HowOut) =>
+  h.kind !== "runOut" && h.kind !== "timedOut";
+
+// Whether the most recent ball took a wicket credited to the bowler.
+export const hasBowlerWicketFallen = (state: InningsState) => {
+  const wicket = state.deliveries.at(-1)?.wicket;
+  return wicket !== undefined && creditedToBowler(wicket.howOut);
+};
 
 // Records a ball. It never ends the over: that happens when the scorer chooses the
 // next bowler.

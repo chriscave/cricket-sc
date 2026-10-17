@@ -179,12 +179,6 @@ export const previousDeliveryBowlerId = (state: InningsState) =>
 export const otherEndBowlerId = (state: InningsState) =>
   state.deliveries.findLast((d) => d.overNumber === state.overNumber - 1)?.bowlerId;
 
-// Choose next bowler:
-// - bowler 3 (no change of bowler)
-// - bowler 2
-// - bowler 4
-// - newBowler
-
 export function apply(
   state: InningsState,
   matchEvent: MatchEvent,

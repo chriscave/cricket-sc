@@ -15,6 +15,9 @@ import {
   type InningsState,
 } from "./types/delivery";
 
+// TODO:
+// Add wickets to command line input
+
 const initialInnings: InningsState = {
   deliveries: [],
   batters: {

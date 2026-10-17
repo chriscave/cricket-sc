@@ -7,7 +7,7 @@ export type ParseResult =
 
 // non-negative numbers positive numbers
 // . as a dot
-// w and W as wicket (for now record the wicket as a bowled, we will fix this later.)
+// w and W as wicket. How the batter was out is chosen afterwards in the how out panel (needsHowOut).
 // For run outs we will fix this later (for now just ignore them)
 // positive numbers followed by b or lb for byes and leg byes (should throw a parsing error for 0b or 0lb)
 // wd or + for wide. wd followed by number for those many runs off the wide. Should also be able to use dots so +.. and +2 are the same

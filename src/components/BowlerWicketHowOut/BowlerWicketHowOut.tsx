@@ -39,14 +39,14 @@ export default function BowlerWicketHowOut({ onSelect, onCancel }: BowlerWicketH
   return (
     <div
       ref={list}
-      className="cl-panel"
+      className="dock-panel"
       tabIndex={0}
       onKeyDown={handleKeyDown}
       role="listbox"
       aria-label="How out"
     >
       <span>How out (← → Enter, Esc to cancel):</span>
-      <ul className="cl-panel-list">
+      <ul className="dock-panel-list">
         {KINDS.map((k, i) => (
           <li
             key={k.kind}

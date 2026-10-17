@@ -1,0 +1,41 @@
+/* Pinned to the bottom of the window. Sticky rather than fixed, so it takes up space
+   at the end of the page and the scorecard can always scroll clear of it, whatever
+   its height. */
+.dock {
+  --dock-bg: #4fbf4f;
+  --dock-fg: #000;
+
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  font: 14px/1 ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace;
+}
+
+/* Panels for a choice (next bowler, how out): the command line's colours swapped,
+   like a tmux menu. Picked with the keyboard, so the highlighted item shows the focus. */
+.dock-panel {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 12px;
+  background: var(--dock-fg);
+  color: var(--dock-bg);
+}
+.dock-panel:focus {
+  outline: none;
+}
+.dock-panel-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dock-panel-list li {
+  padding: 2px 6px;
+}
+.dock-panel-list li.selected {
+  background: var(--dock-bg);
+  color: var(--dock-fg);
+}

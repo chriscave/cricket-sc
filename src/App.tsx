@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./App.css";
 import Scorecard from "@/components/Scorecard";
 import CommandLine from "./components/CommandLine";
+import Dock from "@/components/Dock";
 import NextBowlers from "@/components/NextBowlers";
 import {
   apply,
@@ -85,23 +86,23 @@ function App() {
       <div className="app">
         <Scorecard inningsState={innings}/>
       </div>
-      <CommandLine onInput={handleCommand}>
+      <Dock>
         {pendingWicket ? (
           <BowlerWicketHowOut
             onSelect={handleHowOut}
             onCancel={() => setPendingWicket(null)}
           />
+        ) : sixLegalDeliveries ? (
+          <NextBowlers
+            usedBowlers={usedBowlers}
+            bowlerOfPreviousDelivery={bowlerOfPreviousDelivery}
+            bowlerAtOtherEnd={bowlerAtOtherEnd}
+            onSelect={handleNextBowler}
+          />
         ) : (
-          sixLegalDeliveries && (
-            <NextBowlers
-              usedBowlers={usedBowlers}
-              bowlerOfPreviousDelivery={bowlerOfPreviousDelivery}
-              bowlerAtOtherEnd={bowlerAtOtherEnd}
-              onSelect={handleNextBowler}
-            />
-          )
+          <CommandLine onInput={handleCommand} />
         )}
-      </CommandLine>
+      </Dock>
     </>
   );
 }

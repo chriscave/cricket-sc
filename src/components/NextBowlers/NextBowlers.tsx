@@ -51,14 +51,14 @@ export default function NextBowlers({
   return (
     <div
       ref={list}
-      className="cl-panel"
+      className="dock-panel"
       tabIndex={0}
       onKeyDown={handleKeyDown}
       role="listbox"
       aria-label="Next bowler"
     >
       <span>Next bowler (← → Enter):</span>
-      <ul className="cl-panel-list">
+      <ul className="dock-panel-list">
         {bowlers.map((b, i) => (
           <li
             key={b.id}

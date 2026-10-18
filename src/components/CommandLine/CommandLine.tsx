@@ -5,7 +5,7 @@ import { parseText } from "./parseText";
 
 type CommandLineProps = {
   // needsHowOut: the ball took a wicket and how the batter was out is still to be chosen.
-  onInput: (input: DeliveryInput, needsHowOut: boolean) => void;
+  onInput: (input: DeliveryInput, needsHowOut: boolean, needsRunOutBatsman: boolean) => void;
 };
 
 // Where balls are typed. It's hidden while the scorer is making a choice in another
@@ -31,7 +31,7 @@ export default function CommandLine({ onInput }: CommandLineProps) {
           return;
         }
 
-        onInput(parsed.input, parsed.needsHowOut);
+        onInput(parsed.input, parsed.needsHowOut, parsed.needsRunOutBatsman);
         setErrors([]);
         setText("");
       }}

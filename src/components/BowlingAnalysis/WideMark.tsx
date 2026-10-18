@@ -1,5 +1,5 @@
 import type { DeliveryMark } from "./selectors";
-import MarkLetter from "./MarkLetter";
+import { WicketLetter } from "./WicketMark";
 
 // Quadrant centres of the cross, in fill order: top-left, top-right, bottom-left,
 // bottom-right.
@@ -11,14 +11,12 @@ const CORNERS = [
 ];
 
 // A wide: a "+" with one dot per extra wide in the corners. A wicket to the bowler
-// (stumped, hit wicket) puts a W in the first corner; a run out puts an R in the
-// first corner left free after the dots.
+// (stumped, hit wicket) puts a W in the first corner.
 export default function WideMark({ mark }: { mark: DeliveryMark }) {
   const extraWides = Math.max(0, mark.extras.wides - 1);
-  const corners: ("W" | "R" | "dot")[] = [
+  const corners: ("W" | "dot")[] = [
     ...(mark.bowlerWicket ? (["W"] as const) : []),
     ...Array<"dot">(extraWides).fill("dot"),
-    ...(mark.runOut ? (["R"] as const) : []),
   ].slice(0, CORNERS.length);
 
   return (
@@ -29,7 +27,7 @@ export default function WideMark({ mark }: { mark: DeliveryMark }) {
         return c === "dot" ? (
           <circle key={i} cx={x} cy={y} r="1.4" fill="currentColor" />
         ) : (
-          <MarkLetter key={i} letter={c} x={x} y={y} size={5} />
+          <WicketLetter key={i} x={x} y={y} size={5} />
         );
       })}
     </svg>

@@ -2,7 +2,7 @@ import type { DeliveryInput } from "@/types/delivery";
 
 export type ParseResult =
   // needsHowOut: a wicket fell, and how the batter was out still has to be chosen.
-  | { ok: true; input: DeliveryInput; needsHowOut: boolean }
+  | { ok: true; input: DeliveryInput; needsHowOut: boolean; needsRunOutBatsman: boolean }
   | { ok: false; error: string };
 
 // non-negative numbers positive numbers
@@ -13,15 +13,26 @@ export type ParseResult =
 // wd or + for wide. wd followed by number for those many runs off the wide. Should also be able to use dots so +.. and +2 are the same
 // nb or o or O for no ball. nb4 should mean number and batsman hit 4 runs. nb.... should mean 5 no balls.
 
+// Run outs:
+// R/r, run out without a run
+// (1-6) run out with those runs
+// nbr means run out on nb without runs
+// nb1r means one run off the bat but run out on the next run
+// nb.r means one run not off the bat and run out on the next run
+// +r and +.r means the same as in the nb case
+// br, 2br and 2lbr also means byes with a run out
+
+
 const RUNS = /^\d+$/; //                   "4"
 const BYES = /^(\d*)(b|lb)$/; //           "2b", "lb"
 const WIDE = /^(?:wd|\+)(\d+|\.*)$/; //    "wd", "+2", "wd.."
 const NO_BALL = /^(?:nb|o|O)(\d+|\.*)$/; // "nb", "o4", "nb...."
 
-const ok = (input: DeliveryInput, needsHowOut = false): ParseResult => ({
+const ok = (input: DeliveryInput, {needsHowOut = false, needsRunOutBatsman = false} = {}): ParseResult => ({
   ok: true,
   input,
   needsHowOut,
+  needsRunOutBatsman
 });
 const fail = (error: string): ParseResult => ({ ok: false, error });
 
@@ -30,6 +41,17 @@ const runsTaken = (suffix: string) =>
   RUNS.test(suffix) ? Number(suffix) : suffix.length;
 
 export function parseText(text: string): ParseResult {
+  const t = text.trim();
+  // A trailing r means a batter was run out going for another run: "r", "2r", "nb.r", "2lbr".
+  if (!/[rR]$/.test(t)) return parseBall(t);
+  const ball = parseBall(t.slice(0, -1) || ".");
+  if (!ball.ok) return ball;
+  if (ball.needsHowOut) return fail(`"${t}" can't be both a wicket and a run out.`);
+  return { ...ball, needsRunOutBatsman: true };
+}
+
+
+export function parseBall(text: string): ParseResult {
   const t = text.trim();
   if (t === "") return fail("Type a ball, e.g. 4, ., wd2, nb4 or 2b.");
   if (t === ".") return ok({ batRuns: 0 });
@@ -55,6 +77,6 @@ export function parseText(text: string): ParseResult {
       : ok({ extras: { noBalls: 1 + suffix.length } });
   }
 
-  if (t === "w" || t === "W") return ok({ batRuns: 0 }, true);
+  if (t === "w" || t === "W") return ok({ batRuns: 0 }, {needsHowOut: true});
   return fail(`Couldn't read "${t}". Try e.g. 4, ., wd2, nb4 or 2b.`);
 }

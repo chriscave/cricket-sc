@@ -11,7 +11,6 @@ export type DeliveryMark = {
   batRuns: number;
   extras: Extras;
   bowlerWicket: boolean;
-  runOut: boolean;
 };
 
 export type Over = {
@@ -42,7 +41,6 @@ function toDeliveryMark(d: Delivery): DeliveryMark {
     batRuns: d.batRuns,
     extras: d.extras,
     bowlerWicket: !!d.wicket && creditedToBowler(d.wicket.howOut),
-    runOut: d.wicket?.howOut.kind === "runOut",
   };
 }
 

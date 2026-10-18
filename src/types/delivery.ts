@@ -166,6 +166,11 @@ export const hasBowlerWicketFallen = (state: InningsState) => {
   return wicket !== undefined && creditedToBowler(wicket.howOut);
 };
 
+export const batsmanOnStrike = (state: InningsState) => state.strikerId
+
+export const batsmanOffStrike = (state: InningsState) => state.nonStrikerId
+
+
 // Records a ball. It never ends the over: that happens when the scorer chooses the
 // next bowler.
 export function applyInput(

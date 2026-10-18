@@ -7,6 +7,8 @@ import NextBowlers from "@/components/NextBowlers";
 import {
   apply,
   applyInput,
+  batsmanOffStrike,
+  batsmanOnStrike,
   bowlersUsed,
   currentOverDeliveries,
   hasSixLegalDeliveries,
@@ -18,9 +20,16 @@ import {
 import BowlerWicketHowOut, {
   type BowlerWicketKind,
 } from "./components/BowlerWicketHowOut/BowlerWicketHowOut";
+import RunOutBatsman from "./components/RunOutBatsman";
 
 // TODO:
-// Add wickets to command line input
+// Handle stumping off a wide
+// Fix breaking app when 10 wickets have fallen
+// Support for short runs
+// Support for long and short overs
+// Support for retired
+// Add runouts --> Done
+// Add wickets to command line input --> Done
 
 const initialInnings: InningsState = {
   deliveries: [],
@@ -54,17 +63,35 @@ const initialInnings: InningsState = {
   currentBowlerId: 1,
   strikerId: 1,
   nonStrikerId: 2,
-}
+};
 
 function App() {
-  const [innings, setInnings] = useState<InningsState>(initialInnings)
+  const [innings, setInnings] = useState<InningsState>(initialInnings);
   // A ball that took a wicket, waiting for the scorer to choose how the batter was out.
   // It isn't recorded until then.
-  const [pendingWicket, setPendingWicket] = useState<DeliveryInput | null>(null);
-  const sixLegalDeliveries = hasSixLegalDeliveries(currentOverDeliveries(innings));
-  const handleInput = (input: DeliveryInput) => setInnings((prev) => applyInput(prev, input)) 
-  const handleCommand = (input: DeliveryInput, needsHowOut: boolean) =>
-    needsHowOut ? setPendingWicket(input) : handleInput(input);
+  const [pendingWicket, setPendingWicket] = useState<DeliveryInput | null>(
+    null,
+  );
+  const [pendingRunOut, setPendingRunOut] = useState<DeliveryInput | null>(
+    null,
+  );
+  const sixLegalDeliveries = hasSixLegalDeliveries(
+    currentOverDeliveries(innings),
+  );
+  const strikerId = batsmanOnStrike(innings);
+  const nonStrikerId = batsmanOffStrike(innings);
+  const handleInput = (input: DeliveryInput) =>
+    setInnings((prev) => applyInput(prev, input));
+  const handleCommand = (
+    input: DeliveryInput,
+    needsHowOut: boolean,
+    needsRunOutBatsman: boolean,
+  ) =>
+    needsHowOut
+      ? setPendingWicket(input)
+      : needsRunOutBatsman
+        ? setPendingRunOut(input)
+        : handleInput(input);
   // Bowler's wickets always dismiss the striker.
   const handleHowOut = (kind: BowlerWicketKind) => {
     if (!pendingWicket || innings.strikerId === null) return;
@@ -76,21 +103,37 @@ function App() {
     });
     setPendingWicket(null);
   };
-  const handleNextBowler = (nextBowlerId: number) => setInnings((prev) => apply(prev, { type: "endOver", nextBowlerId}))
-  const usedBowlers = bowlersUsed(innings)
-  const bowlerOfPreviousDelivery = previousDeliveryBowlerId(innings)
-  const bowlerAtOtherEnd = otherEndBowlerId(innings)
+  const handleRunOut = (batterOutId: number) => {
+    if (!pendingRunOut) return;
+    handleInput({
+      ...pendingRunOut,
+      wicket: { batterOutId, howOut: { kind: "runOut" } },
+    });
+    setPendingRunOut(null);
+  };
+  const handleNextBowler = (nextBowlerId: number) =>
+    setInnings((prev) => apply(prev, { type: "endOver", nextBowlerId }));
+  const usedBowlers = bowlersUsed(innings);
+  const bowlerOfPreviousDelivery = previousDeliveryBowlerId(innings);
+  const bowlerAtOtherEnd = otherEndBowlerId(innings);
 
   return (
     <>
       <div className="app">
-        <Scorecard inningsState={innings}/>
+        <Scorecard inningsState={innings} />
       </div>
       <Dock>
         {pendingWicket ? (
           <BowlerWicketHowOut
             onSelect={handleHowOut}
             onCancel={() => setPendingWicket(null)}
+          />
+        ) : pendingRunOut && strikerId !== null && nonStrikerId !== null ? (
+          <RunOutBatsman
+            onSelect={handleRunOut}
+            onCancel={() => setPendingRunOut(null)}
+            strikerId={strikerId}
+            nonStrikerId={nonStrikerId}
           />
         ) : sixLegalDeliveries ? (
           <NextBowlers

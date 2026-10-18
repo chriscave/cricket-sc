@@ -62,8 +62,7 @@ function formatOvers(completed = 0, balls = 0): string {
     if (mark.extras.noBalls) return <NoBallMark mark={mark} />;
     if (mark.extras.byes) return <ByeMark kind="bye" />;
     if (mark.extras.legByes) return <ByeMark kind="legBye" />;
-    if (mark.bowlerWicket) return <WicketMark kind="bowler" />;
-    if (mark.runOut) return <WicketMark kind="runOut" />;
+    if (mark.bowlerWicket) return <WicketMark />;
     if (mark.batRuns === 0) return <DotMark />;
     return mark.batRuns;
   }

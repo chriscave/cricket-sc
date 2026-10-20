@@ -24,13 +24,12 @@ interface DismissalRules {
 export const DISMISSALS = {
   bowled:              { label: "bowled",                creditedToBowler: true,  runsCount: false, offWide: false, offNoBall: false, needsFielder: false, nonStrikerCanBeOut: false },
   caught:              { label: "caught",                creditedToBowler: true,  runsCount: false, offWide: false, offNoBall: false, needsFielder: true,  nonStrikerCanBeOut: false },
-  lbw:                 { label: "lbw",                   creditedToBowler: true,  runsCount: false, offWide: false, offNoBall: false, needsFielder: false, nonStrikerCanBeOut: false },
+  lbw:                 { label: "LBW",                   creditedToBowler: true,  runsCount: false, offWide: false, offNoBall: false, needsFielder: false, nonStrikerCanBeOut: false },
   stumped:             { label: "stumped",               creditedToBowler: true,  runsCount: false, offWide: true,  offNoBall: false, needsFielder: true,  nonStrikerCanBeOut: false },
   hitWicket:           { label: "hit wicket",            creditedToBowler: true,  runsCount: false, offWide: true,  offNoBall: false, needsFielder: false, nonStrikerCanBeOut: false },
   runOut:              { label: "run out",               creditedToBowler: false, runsCount: true,  offWide: true,  offNoBall: true,  needsFielder: true,  nonStrikerCanBeOut: true  },
   obstructingTheField: { label: "obstructing the field", creditedToBowler: false, runsCount: true,  offWide: true,  offNoBall: true,  needsFielder: false, nonStrikerCanBeOut: true  },
   hitTheBallTwice:     { label: "hit the ball twice",    creditedToBowler: false, runsCount: false, offWide: false, offNoBall: true,  needsFielder: false, nonStrikerCanBeOut: false },
-  timedOut:            { label: "timed out",             creditedToBowler: false, runsCount: false, offWide: false, offNoBall: false, needsFielder: false, nonStrikerCanBeOut: true  },
 } as const satisfies Record<string, DismissalRules>;
 
 export type HowOut = keyof typeof DISMISSALS;
@@ -139,6 +138,13 @@ export function validateDeliveryInput(input: DeliveryInput): ValidationResult {
   return errors.length ? { valid: false, errors } : { valid: true };
 }
 
+// The ways a batter could have been out on this ball, in the order of DISMISSALS.
+export const possibleDismissals = (input: DeliveryInput): HowOut[] =>
+  (Object.keys(DISMISSALS) as HowOut[]).filter(
+    (howOut) =>
+      validateDeliveryInput({ ...input, wicket: { batterOutId: 0, howOut } }).valid,
+  );
+
 export function input2Event(
   input: DeliveryInput,
   state: InningsState,
@@ -165,7 +171,7 @@ export const currentOverDeliveries = (state: InningsState) =>
 export const hasSixLegalDeliveries = (over: Delivery[]) =>
   over.filter(isLegal).length >= 6;
 
-// Wickets credited to the bowler: everything except run outs and timed out.
+// Wickets credited to the bowler.
 export const creditedToBowler = (h: HowOut) => DISMISSALS[h].creditedToBowler;
 
 // Whether the most recent ball took a wicket credited to the bowler.

@@ -11,16 +11,25 @@ import {
   batsmanOnStrike,
   bowlersUsed,
   currentOverDeliveries,
+  DISMISSALS,
   hasSixLegalDeliveries,
   otherEndBowlerId,
+  possibleDismissals,
   previousDeliveryBowlerId,
   type DeliveryInput,
+  type HowOut,
   type InningsState,
 } from "./types/delivery";
-import BowlerWicketHowOut, {
-  type BowlerWicketKind,
-} from "./components/BowlerWicketHowOut/BowlerWicketHowOut";
-import RunOutBatsman from "./components/RunOutBatsman";
+import DockPicker from "@/components/DockPicker";
+
+const howOutLabel = (h: HowOut) =>
+  DISMISSALS[h].label[0].toUpperCase() + DISMISSALS[h].label.slice(1);
+
+// A ball that took a wicket, not yet recorded. The scorer first chooses how the batter
+// was out, then, if it could be either batter, which one.
+type PendingWicket =
+  | { awaiting: "howOut"; input: DeliveryInput }
+  | { awaiting: "batterOut"; input: DeliveryInput; howOut: HowOut };
 
 // TODO:
 // Handle stumping off a wide
@@ -68,14 +77,7 @@ const initialInnings: InningsState = {
 
 function App() {
   const [innings, setInnings] = useState<InningsState>(initialInnings);
-  // A ball that took a wicket, waiting for the scorer to choose how the batter was out.
-  // It isn't recorded until then.
-  const [pendingWicket, setPendingWicket] = useState<DeliveryInput | null>(
-    null,
-  );
-  const [pendingRunOut, setPendingRunOut] = useState<DeliveryInput | null>(
-    null,
-  );
+  const [pendingWicket, setPendingWicket] = useState<PendingWicket | null>(null);
   const sixLegalDeliveries = hasSixLegalDeliveries(
     currentOverDeliveries(innings),
   );
@@ -83,34 +85,22 @@ function App() {
   const nonStrikerId = batsmanOffStrike(innings);
   const handleInput = (input: DeliveryInput) =>
     setInnings((prev) => applyInput(prev, input));
-  const handleCommand = (
-    input: DeliveryInput,
-    needsHowOut: boolean,
-    needsRunOutBatsman: boolean,
-  ) =>
-    needsHowOut
-      ? setPendingWicket(input)
-      : needsRunOutBatsman
-        ? setPendingRunOut(input)
-        : handleInput(input);
-  // Bowler's wickets always dismiss the striker.
-  const handleHowOut = (kind: BowlerWicketKind) => {
-    if (!pendingWicket || innings.strikerId === null) return;
-    // TODO: validate the finished ball (e.g. no stumping off a no ball) once wickets
-    // can be combined with extras.
-    handleInput({
-      ...pendingWicket,
-      wicket: { batterOutId: innings.strikerId, howOut: kind },
-    });
+  const handleCommand = (input: DeliveryInput, needsHowOut: boolean) =>
+    needsHowOut ? setPendingWicket({ awaiting: "howOut", input }) : handleInput(input);
+  const recordWicket = (input: DeliveryInput, howOut: HowOut, batterOutId: number) => {
+    handleInput({ ...input, wicket: { batterOutId, howOut } });
     setPendingWicket(null);
   };
-  const handleRunOut = (batterOutId: number) => {
-    if (!pendingRunOut) return;
-    handleInput({
-      ...pendingRunOut,
-      wicket: { batterOutId, howOut: "runOut" },
-    });
-    setPendingRunOut(null);
+  // Only some dismissals can be of the non-striker. For the rest the striker is out.
+  const handleHowOut = (howOut: HowOut) => {
+    if (!pendingWicket || strikerId === null) return;
+    if (DISMISSALS[howOut].nonStrikerCanBeOut)
+      setPendingWicket({ awaiting: "batterOut", input: pendingWicket.input, howOut });
+    else recordWicket(pendingWicket.input, howOut, strikerId);
+  };
+  const handleBatterOut = (batterOutId: number) => {
+    if (pendingWicket?.awaiting !== "batterOut") return;
+    recordWicket(pendingWicket.input, pendingWicket.howOut, batterOutId);
   };
   const handleNextBowler = (nextBowlerId: number) =>
     setInnings((prev) => apply(prev, { type: "endOver", nextBowlerId }));
@@ -124,17 +114,29 @@ function App() {
         <Scorecard inningsState={innings} />
       </div>
       <Dock>
-        {pendingWicket ? (
-          <BowlerWicketHowOut
+        {pendingWicket?.awaiting === "howOut" ? (
+          <DockPicker
+            key="howOut"
+            title="How out"
+            options={possibleDismissals(pendingWicket.input).map((h) => ({
+              value: h,
+              label: howOutLabel(h),
+            }))}
             onSelect={handleHowOut}
             onCancel={() => setPendingWicket(null)}
           />
-        ) : pendingRunOut && strikerId !== null && nonStrikerId !== null ? (
-          <RunOutBatsman
-            onSelect={handleRunOut}
-            onCancel={() => setPendingRunOut(null)}
-            strikerId={strikerId}
-            nonStrikerId={nonStrikerId}
+        ) : pendingWicket?.awaiting === "batterOut" &&
+          strikerId !== null &&
+          nonStrikerId !== null ? (
+          <DockPicker
+            key="batterOut"
+            title="Which batter is out"
+            options={[
+              { value: strikerId, label: `Batsman-${strikerId}` },
+              { value: nonStrikerId, label: `Batsman-${nonStrikerId}` },
+            ]}
+            onSelect={handleBatterOut}
+            onCancel={() => setPendingWicket({ awaiting: "howOut", input: pendingWicket.input })}
           />
         ) : sixLegalDeliveries ? (
           <NextBowlers

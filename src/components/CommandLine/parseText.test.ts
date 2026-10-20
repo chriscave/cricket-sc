@@ -2,9 +2,8 @@ import { describe, it, expect } from "vitest";
 import type { DeliveryInput } from "@/types/delivery";
 import { parseText } from "./parseText";
 
-const parsesTo = (text: string, input: DeliveryInput, needsRunOutBatsman = false) =>
-  expect(parseText(text)).toEqual({ ok: true, input, needsHowOut: false, needsRunOutBatsman });
-const runOutTo = (text: string, input: DeliveryInput) => parsesTo(text, input, true);
+const parsesTo = (text: string, input: DeliveryInput) =>
+  expect(parseText(text)).toEqual({ ok: true, input, needsHowOut: false });
 const fails = (text: string) => expect(parseText(text).ok).toBe(false);
 
 describe("parseText", () => {
@@ -19,39 +18,21 @@ describe("parseText", () => {
   });
 
   describe("wickets", () => {
-    it.each(["w", "W"])("%s is a wicket still needing how out", (text) =>
-      expect(parseText(text)).toEqual({
-        ok: true,
-        input: { batRuns: 0 },
-        needsHowOut: true,
-        needsRunOutBatsman: false,
-      }));
-    it.each(["+w", "+W", "wdw"])("%s is a wicket off a wide still needing how out", (text) =>
-      expect(parseText(text)).toEqual({
-        ok: true,
-        input: { extras: { wides: 1 } },
-        needsHowOut: true,
-        needsRunOutBatsman: false,
-      }));
-  });
-
-  describe("run outs", () => {
-    it.each(["r", "R"])("%s is a run out without a run", (text) =>
-      runOutTo(text, { batRuns: 0 }));
-    it("2r is a run out after 2 runs", () => runOutTo("2r", { batRuns: 2 }));
-    it("nbr is a run out on a no ball", () =>
-      runOutTo("nbr", { extras: { noBalls: 1 } }));
-    it("nb1r is a no ball, 1 off the bat, then a run out", () =>
-      runOutTo("nb1r", { batRuns: 1, extras: { noBalls: 1 } }));
-    it("nb.r is a no ball, 1 not off the bat, then a run out", () =>
-      runOutTo("nb.r", { extras: { noBalls: 2 } }));
-    it("+r is a run out on a wide", () => runOutTo("+r", { extras: { wides: 1 } }));
-    it("+.r is a wide, 1 run, then a run out", () =>
-      runOutTo("+.r", { extras: { wides: 2 } }));
-    it("br is a run out going for a bye", () => runOutTo("br", { extras: { byes: 1 } }));
-    it("2br is a run out after 2 byes", () => runOutTo("2br", { extras: { byes: 2 } }));
-    it("2lbr is a run out after 2 leg byes", () =>
-      runOutTo("2lbr", { extras: { legByes: 2 } }));
+    const wicketOn = (text: string, input: DeliveryInput) =>
+      expect(parseText(text)).toEqual({ ok: true, input, needsHowOut: true });
+    it.each(["w", "W"])("%s is a wicket on a dot ball", (t) => wicketOn(t, { batRuns: 0 }));
+    it("2w is a wicket after 2 runs", () => wicketOn("2w", { batRuns: 2 }));
+    it.each(["+w", "wdw"])("%s is a wicket off a wide", (t) =>
+      wicketOn(t, { extras: { wides: 1 } }));
+    it("+.w is a wicket after a wide and a run", () =>
+      wicketOn("+.w", { extras: { wides: 2 } }));
+    it("nbw is a wicket off a no ball", () => wicketOn("nbw", { extras: { noBalls: 1 } }));
+    it("O..w is a wicket after a no ball and 2 runs", () =>
+      wicketOn("O..w", { extras: { noBalls: 3 } }));
+    it("nb1w is a wicket after a no ball hit for 1", () =>
+      wicketOn("nb1w", { batRuns: 1, extras: { noBalls: 1 } }));
+    it("2lbw is a wicket after 2 leg byes", () =>
+      wicketOn("2lbw", { extras: { legByes: 2 } }));
   });
 
   describe("byes and leg byes", () => {
@@ -91,10 +72,9 @@ describe("parseText", () => {
       ["0 leg byes", "0lb"],
       ["unknown letters", "x"],
       ["text after a number", "4q"],
-      ["a wicket and a run out", "wr"],
-      ["two run outs", "rr"],
-      ["a wicket off a wide and a run out", "+wr"],
-      ["0 byes then a run out", "0br"],
+      ["two wickets", "ww"],
+      ["0 byes then a wicket", "0bw"],
+      ["r on its own", "r"],
     ])("%s", (_, text) => fails(text));
   });
 });

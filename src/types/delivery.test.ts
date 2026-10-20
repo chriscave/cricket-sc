@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  possibleDismissals,
   validateDeliveryInput,
   type DeliveryInput,
   type HowOut,
@@ -97,4 +98,15 @@ describe("validateDeliveryInput", () => {
   //   expect(result.valid).toBe(false);
   //   if (!result.valid) expect(result.errors.length).toBeGreaterThanOrEqual(2);
   // });
+});
+
+describe("possibleDismissals", () => {
+  it.each<[string, DeliveryInput, HowOut[]]>([
+    ["a legal ball", {}, ["bowled", "caught", "lbw", "stumped", "hitWicket", "runOut", "obstructingTheField", "hitTheBallTwice"]],
+    ["runs off the bat", { batRuns: 2 }, ["runOut", "obstructingTheField"]],
+    ["a wide", { extras: { wides: 1 } }, ["stumped", "hitWicket", "runOut", "obstructingTheField"]],
+    ["a no ball", { extras: { noBalls: 1 } }, ["runOut", "obstructingTheField", "hitTheBallTwice"]],
+    ["a no ball with runs not off the bat", { extras: { noBalls: 3 } }, ["runOut", "obstructingTheField"]],
+    ["byes", { extras: { byes: 1 } }, ["runOut", "obstructingTheField"]],
+  ])("%s", (_, input, expected) => expect(possibleDismissals(input)).toEqual(expected));
 });

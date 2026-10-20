@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import type { HowOut } from "@/types/delivery";
+import type { DISMISSALS, HowOut } from "@/types/delivery";
 
-// Dismissals credited to the bowler. Run outs and timed out aren't chosen here.
-export type BowlerWicketKind = Exclude<HowOut["kind"], "runOut" | "timedOut">;
+// Dismissals credited to the bowler, read from the creditedToBowler flags in DISMISSALS.
+export type BowlerWicketKind = {
+  [K in HowOut]: (typeof DISMISSALS)[K]["creditedToBowler"] extends true ? K : never;
+}[HowOut];
 
 const KINDS: { kind: BowlerWicketKind; label: string }[] = [
   { kind: "bowled", label: "Bowled" },

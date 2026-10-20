@@ -8,12 +8,14 @@ import {
 const isValid = (input: DeliveryInput) => validateDeliveryInput(input).valid;
 const out = (howOut: HowOut) => ({ batterOutId: 1, howOut });
 
-const BOWLED: HowOut = { kind: "bowled" };
-const LBW: HowOut = { kind: "lbw" };
-const CAUGHT: HowOut = { kind: "caught", fielder: "Jones" };
-const STUMPED: HowOut = { kind: "stumped", keeper: "Smith" };
-const HIT_WICKET: HowOut = { kind: "hitWicket" };
-const RUN_OUT: HowOut = { kind: "runOut" };
+const BOWLED: HowOut = "bowled";
+const LBW: HowOut = "lbw";
+const CAUGHT: HowOut = "caught";
+const STUMPED: HowOut = "stumped";
+const HIT_WICKET: HowOut = "hitWicket";
+const RUN_OUT: HowOut = "runOut";
+const OBSTRUCTING: HowOut = "obstructingTheField";
+const HIT_TWICE: HowOut = "hitTheBallTwice";
 
 describe("validateDeliveryInput", () => {
   describe("accepts", () => {
@@ -26,15 +28,26 @@ describe("validateDeliveryInput", () => {
     it("byes", () => expect(isValid({ extras: { byes: 2 } })).toBe(true));
     it("leg byes", () => expect(isValid({ extras: { legByes: 1 } })).toBe(true));
     it("a bowled wicket", () =>
-      expect(isValid({ wicket: { batterOutId: 1, howOut: { kind: "bowled" } } })).toBe(true));
+      expect(isValid({ wicket: out(BOWLED) })).toBe(true));
+    it("a catch with the fielder recorded", () =>
+      expect(isValid({ wicket: { batterOutId: 1, howOut: CAUGHT, fielder: "Jones" } })).toBe(true));
     it("runs off the bat and then a run out", () =>
       expect(isValid({ batRuns: 1, wicket: out(RUN_OUT) })).toBe(true));
-    it("a run out off a no ball", () =>
-      expect(isValid({ extras: { noBalls: 1 }, wicket: out(RUN_OUT) })).toBe(true));
+    it.each([
+      ["run out", RUN_OUT],
+      ["obstructing the field", OBSTRUCTING],
+      ["hit the ball twice", HIT_TWICE],
+    ])("%s off a no ball", (_, howOut) =>
+      expect(isValid({ extras: { noBalls: 1 }, wicket: out(howOut) })).toBe(true));
+    it("runs taken before obstructing the field", () =>
+      expect(isValid({ batRuns: 1, wicket: out(OBSTRUCTING) })).toBe(true));
+    it("a run out after wides were run", () =>
+      expect(isValid({ extras: { wides: 2 }, wicket: out(RUN_OUT) })).toBe(true));
     it.each([
       ["stumped", STUMPED],
       ["hit wicket", HIT_WICKET],
       ["run out", RUN_OUT],
+      ["obstructing the field", OBSTRUCTING],
     ])("%s off a wide", (_, howOut) =>
       expect(isValid({ extras: { wides: 1 }, wicket: out(howOut) })).toBe(true));
   });
@@ -63,8 +76,15 @@ describe("validateDeliveryInput", () => {
       ["bowled", BOWLED],
       ["lbw", LBW],
       ["caught", CAUGHT],
+      ["hit the ball twice", HIT_TWICE],
     ])("%s off a wide", (_, howOut) =>
       expect(isValid({ extras: { wides: 1 }, wicket: out(howOut) })).toBe(false));
+    it.each([
+      ["runs off the bat when caught", { batRuns: 1, wicket: out(CAUGHT) }],
+      ["byes when bowled", { extras: { byes: 1 }, wicket: out(BOWLED) }],
+      ["leg byes when hit the ball twice", { extras: { legByes: 1 }, wicket: out(HIT_TWICE) }],
+      ["wides run when stumped", { extras: { wides: 2 }, wicket: out(STUMPED) }],
+    ])("%s", (_, input: DeliveryInput) => expect(isValid(input)).toBe(false));
     it.each([
       ["byes", { byes: 1 }],
       ["leg byes", { legByes: 1 }],

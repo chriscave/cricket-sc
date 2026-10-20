@@ -26,6 +26,13 @@ describe("parseText", () => {
         needsHowOut: true,
         needsRunOutBatsman: false,
       }));
+    it.each(["+w", "+W", "wdw"])("%s is a wicket off a wide still needing how out", (text) =>
+      expect(parseText(text)).toEqual({
+        ok: true,
+        input: { extras: { wides: 1 } },
+        needsHowOut: true,
+        needsRunOutBatsman: false,
+      }));
   });
 
   describe("run outs", () => {
@@ -86,6 +93,7 @@ describe("parseText", () => {
       ["text after a number", "4q"],
       ["a wicket and a run out", "wr"],
       ["two run outs", "rr"],
+      ["a wicket off a wide and a run out", "+wr"],
       ["0 byes then a run out", "0br"],
     ])("%s", (_, text) => fails(text));
   });

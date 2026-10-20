@@ -11,6 +11,7 @@ export type ParseResult =
 // For run outs we will fix this later (for now just ignore them)
 // positive numbers followed by b or lb for byes and leg byes (should throw a parsing error for 0b or 0lb)
 // wd or + for wide. wd followed by number for those many runs off the wide. Should also be able to use dots so +.. and +2 are the same
+// +w or wdw for a wicket off a wide (stumped or hit wicket). How out is chosen afterwards, as with w.
 // nb or o or O for no ball. nb4 should mean number and batsman hit 4 runs. nb.... should mean 5 no balls.
 
 // Run outs:
@@ -26,6 +27,7 @@ export type ParseResult =
 const RUNS = /^\d+$/; //                   "4"
 const BYES = /^(\d*)(b|lb)$/; //           "2b", "lb"
 const WIDE = /^(?:wd|\+)(\d+|\.*)$/; //    "wd", "+2", "wd.."
+const WIDE_WICKET = /^(?:wd|\+)[wW]$/; //  "+w", "wdw"
 const NO_BALL = /^(?:nb|o|O)(\d+|\.*)$/; // "nb", "o4", "nb...."
 
 const ok = (input: DeliveryInput, {needsHowOut = false, needsRunOutBatsman = false} = {}): ParseResult => ({
@@ -67,6 +69,7 @@ export function parseBall(text: string): ParseResult {
 
   const wide = t.match(WIDE);
   if (wide) return ok({ extras: { wides: 1 + runsTaken(wide[1]) } });
+  if (WIDE_WICKET.test(t)) return ok({ extras: { wides: 1 } }, { needsHowOut: true });
 
   // After a no ball a number is runs off the bat, but dots are runs not off the bat.
   const noBall = t.match(NO_BALL);

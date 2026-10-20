@@ -7,18 +7,38 @@ export interface Extras {
 
 export const NO_EXTRAS: Extras = { wides: 0, noBalls: 0, byes: 0, legByes: 0 };
 
-export type HowOut =
-  | { kind: "bowled" }
-  | { kind: "lbw" }
-  | { kind: "hitWicket" }
-  | { kind: "timedOut" }
-  | { kind: "caught"; fielder?: string }
-  | { kind: "stumped"; keeper?: string }
-  | { kind: "runOut"; fielder?: string };
+interface DismissalRules {
+  label: string;
+  creditedToBowler: boolean;
+  // Whether runs completed before the wicket still count.
+  runsCount: boolean;
+  offWide: boolean;
+  offNoBall: boolean;
+  // Caught, stumped (the keeper) and run out record who took the wicket.
+  needsFielder: boolean;
+  // Only run out and obstructing the field can dismiss the non-striker.
+  nonStrikerCanBeOut: boolean;
+}
+
+// prettier-ignore
+export const DISMISSALS = {
+  bowled:              { label: "bowled",                creditedToBowler: true,  runsCount: false, offWide: false, offNoBall: false, needsFielder: false, nonStrikerCanBeOut: false },
+  caught:              { label: "caught",                creditedToBowler: true,  runsCount: false, offWide: false, offNoBall: false, needsFielder: true,  nonStrikerCanBeOut: false },
+  lbw:                 { label: "lbw",                   creditedToBowler: true,  runsCount: false, offWide: false, offNoBall: false, needsFielder: false, nonStrikerCanBeOut: false },
+  stumped:             { label: "stumped",               creditedToBowler: true,  runsCount: false, offWide: true,  offNoBall: false, needsFielder: true,  nonStrikerCanBeOut: false },
+  hitWicket:           { label: "hit wicket",            creditedToBowler: true,  runsCount: false, offWide: true,  offNoBall: false, needsFielder: false, nonStrikerCanBeOut: false },
+  runOut:              { label: "run out",               creditedToBowler: false, runsCount: true,  offWide: true,  offNoBall: true,  needsFielder: true,  nonStrikerCanBeOut: true  },
+  obstructingTheField: { label: "obstructing the field", creditedToBowler: false, runsCount: true,  offWide: true,  offNoBall: true,  needsFielder: false, nonStrikerCanBeOut: true  },
+  hitTheBallTwice:     { label: "hit the ball twice",    creditedToBowler: false, runsCount: false, offWide: false, offNoBall: true,  needsFielder: false, nonStrikerCanBeOut: false },
+  timedOut:            { label: "timed out",             creditedToBowler: false, runsCount: false, offWide: false, offNoBall: false, needsFielder: false, nonStrikerCanBeOut: true  },
+} as const satisfies Record<string, DismissalRules>;
+
+export type HowOut = keyof typeof DISMISSALS;
 
 export interface Wicket {
   batterOutId: number;
   howOut: HowOut;
+  fielder?: string;
 }
 
 export interface Delivery {
@@ -76,20 +96,6 @@ export interface InningsState {
 
 type ValidationResult = { valid: true } | { valid: false; errors: string[] };
 
-// Dismissals possible off a wide or a no ball. Any other dismissal needs a legal ball.
-const OUT_OFF_A_WIDE: HowOut["kind"][] = ["stumped", "hitWicket", "runOut"];
-const OUT_OFF_A_NO_BALL: HowOut["kind"][] = ["runOut"];
-
-const HOW_OUT_LABELS: Record<HowOut["kind"], string> = {
-  bowled: "bowled",
-  lbw: "lbw",
-  hitWicket: "hit wicket",
-  timedOut: "timed out",
-  caught: "caught",
-  stumped: "stumped",
-  runOut: "run out",
-};
-
 const isCount = (n: number) => Number.isInteger(n) && n >= 0;
 
 // Checks a delivery makes sense on its own, and returns every problem found, not just
@@ -98,7 +104,7 @@ export function validateDeliveryInput(input: DeliveryInput): ValidationResult {
   const errors: string[] = [];
   const batRuns = input.batRuns ?? 0;
   const { wides, noBalls, byes, legByes } = { ...NO_EXTRAS, ...input.extras };
-  const howOut = input.wicket?.howOut.kind;
+  const howOut = input.wicket?.howOut;
 
   const counts: [string, number][] = [
     ["Runs off the bat", batRuns],
@@ -120,12 +126,15 @@ export function validateDeliveryInput(input: DeliveryInput): ValidationResult {
   if ((byes || legByes) && batRuns)
     errors.push("Byes and leg byes can't have runs off the bat as well.");
 
-  if (howOut && wides && !OUT_OFF_A_WIDE.includes(howOut))
-    errors.push(`A batter can't be out ${HOW_OUT_LABELS[howOut]} off a wide.`);
-  if (howOut && noBalls && !OUT_OFF_A_NO_BALL.includes(howOut))
-    errors.push(
-      `A batter can't be out ${HOW_OUT_LABELS[howOut]} off a no ball.`,
-    );
+  if (howOut) {
+    const rules = DISMISSALS[howOut];
+    if (wides && !rules.offWide)
+      errors.push(`A batter can't be out ${rules.label} off a wide.`);
+    if (noBalls && !rules.offNoBall)
+      errors.push(`A batter can't be out ${rules.label} off a no ball.`);
+    if (!rules.runsCount && (batRuns || byes || legByes || wides > 1 || noBalls > 1))
+      errors.push(`No runs can be scored when a batter is out ${rules.label}.`);
+  }
 
   return errors.length ? { valid: false, errors } : { valid: true };
 }
@@ -157,8 +166,7 @@ export const hasSixLegalDeliveries = (over: Delivery[]) =>
   over.filter(isLegal).length >= 6;
 
 // Wickets credited to the bowler: everything except run outs and timed out.
-export const creditedToBowler = (h: HowOut) =>
-  h.kind !== "runOut" && h.kind !== "timedOut";
+export const creditedToBowler = (h: HowOut) => DISMISSALS[h].creditedToBowler;
 
 // Whether the most recent ball took a wicket credited to the bowler.
 export const hasBowlerWicketFallen = (state: InningsState) => {
@@ -166,10 +174,9 @@ export const hasBowlerWicketFallen = (state: InningsState) => {
   return wicket !== undefined && creditedToBowler(wicket.howOut);
 };
 
-export const batsmanOnStrike = (state: InningsState) => state.strikerId
+export const batsmanOnStrike = (state: InningsState) => state.strikerId;
 
-export const batsmanOffStrike = (state: InningsState) => state.nonStrikerId
-
+export const batsmanOffStrike = (state: InningsState) => state.nonStrikerId;
 
 // Records a ball. It never ends the over: that happens when the scorer chooses the
 // next bowler.
@@ -192,7 +199,8 @@ export const previousDeliveryBowlerId = (state: InningsState) =>
 // The bowler of the over before the current one. Normally that's the bowler at the
 // other end, who bowls the next over. Undefined during the first over.
 export const otherEndBowlerId = (state: InningsState) =>
-  state.deliveries.findLast((d) => d.overNumber === state.overNumber - 1)?.bowlerId;
+  state.deliveries.findLast((d) => d.overNumber === state.overNumber - 1)
+    ?.bowlerId;
 
 export function apply(
   state: InningsState,

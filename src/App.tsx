@@ -24,6 +24,7 @@ import RunOutBatsman from "./components/RunOutBatsman";
 
 // TODO:
 // Handle stumping off a wide
+// Other ways of being out are: 
 // Fix breaking app when 10 wickets have fallen
 // Support for short runs
 // Support for long and short overs
@@ -99,7 +100,7 @@ function App() {
     // can be combined with extras.
     handleInput({
       ...pendingWicket,
-      wicket: { batterOutId: innings.strikerId, howOut: { kind } },
+      wicket: { batterOutId: innings.strikerId, howOut: kind },
     });
     setPendingWicket(null);
   };
@@ -107,7 +108,7 @@ function App() {
     if (!pendingRunOut) return;
     handleInput({
       ...pendingRunOut,
-      wicket: { batterOutId, howOut: { kind: "runOut" } },
+      wicket: { batterOutId, howOut: "runOut" },
     });
     setPendingRunOut(null);
   };

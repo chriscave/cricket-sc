@@ -1,11 +1,6 @@
-import type { BowlerRow, DeliveryMark, Over } from "./selectors";
-import WideMark from "./WideMark";
-import NoBallMark from "./NoBallMark";
-import ByeMark from "./ByeMark";
-import DotMark from "./DotMark";
+import type { BowlerRow, Over } from "./selectors";
 import "./BowlingAnalysis.css";
-import type { ReactNode } from "react";
-import WicketMark from "./WicketMark";
+import { renderMark } from "@/components/DeliveryMarks";
 import MaidenMark from "./MaidenMark";
 
 const OVER_COUNT = 20;
@@ -57,15 +52,6 @@ function formatOvers(completed = 0, balls = 0): string {
   return balls === 0 ? `${completed}` : `${completed}.${balls}`;
 }
 
- function renderMark(mark: DeliveryMark): ReactNode {
-    if (mark.extras.wides) return <WideMark mark={mark} />;
-    if (mark.extras.noBalls) return <NoBallMark mark={mark} />;
-    if (mark.extras.byes) return <ByeMark kind="bye" />;
-    if (mark.extras.legByes) return <ByeMark kind="legBye" />;
-    if (mark.bowlerWicket) return <WicketMark />;
-    if (mark.batRuns === 0) return <DotMark />;
-    return mark.batRuns;
-  }
 
 
 function totalCell(

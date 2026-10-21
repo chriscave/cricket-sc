@@ -8,7 +8,7 @@ const TRIANGLES = {
 export default function ByeMark({ kind }: { kind: "bye" | "legBye" }) {
   return (
     <svg
-      className="ba-mark"
+      className="dm-mark"
       viewBox="0 0 12 12"
       aria-label={kind === "bye" ? "bye" : "leg bye"}
     >

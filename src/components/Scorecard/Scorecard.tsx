@@ -8,7 +8,7 @@ import MatchResult from "@/components/MatchResult";
 import NotesRemarks from "@/components/NotesRemarks";
 import RunMilestones from "@/components/RunMilestones";
 import RunTracker from "@/components/RunTracker";
-import BattingAnalysis from "@/components/BattingAnalysis";
+import BattingAnalysis, { selectBattingAnalysis } from "@/components/BattingAnalysis";
 import ScoreSummary from "@/components/ScoreSummary";
 import ScoringRate from "@/components/ScoringRate";
 import type { InningsState } from "@/types/delivery";
@@ -45,7 +45,7 @@ export default function Scorecard({ inningsState }: ScorecardProps) {
     <div ref={sheet} className="container" style={{ width: SHEET_WIDTH, zoom }}>
       <div className="lhs">
         <MatchHeader />
-        <BattingAnalysis />
+        <BattingAnalysis innings={selectBattingAnalysis(inningsState)} />
         <div className="fow-and-score">
           <FallOfWickets />
           <ScoreSummary />

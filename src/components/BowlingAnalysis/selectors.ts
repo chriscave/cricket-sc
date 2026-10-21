@@ -1,17 +1,9 @@
 import {
   creditedToBowler,
-  isLegal,
   type Delivery,
-  type Extras,
   type InningsState,
 } from "@/types/delivery";
-
-export type DeliveryMark = {
-  isLegal: boolean;
-  batRuns: number;
-  extras: Extras;
-  bowlerWicket: boolean;
-};
+import { toDeliveryMark, type DeliveryMark } from "@/components/DeliveryMarks";
 
 export type Over = {
   deliveryMarks: DeliveryMark[];
@@ -35,14 +27,6 @@ export type BowlerRow = {
   wkts: number;
   avrge?: number;
 };
-function toDeliveryMark(d: Delivery): DeliveryMark {
-  return {
-    isLegal: isLegal(d),
-    batRuns: d.batRuns,
-    extras: d.extras,
-    bowlerWicket: !!d.wicket && creditedToBowler(d.wicket.howOut),
-  };
-}
 
 export function selectBowlingsAnalysis(state: InningsState): BowlerRow[] {
   const bowlers: BowlerRow[] = [];

@@ -1,0 +1,8 @@
+/* Drawn delivery marks (WideMark etc.): about one text line tall, shrinking to fit
+   narrow columns. */
+.dm-mark {
+  display: block;
+  width: 1.2em;
+  height: 1.2em;
+  max-width: 100%;
+}

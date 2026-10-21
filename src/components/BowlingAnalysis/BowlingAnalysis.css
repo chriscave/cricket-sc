@@ -78,15 +78,6 @@
   line-height: 1;
 }
 
-/* Drawn delivery marks (WideMark etc.): about one text line tall, shrinking to fit
-   narrow columns. */
-.ba-mark {
-  display: block;
-  width: 1.2em;
-  height: 1.2em;
-  max-width: 100%;
-}
-
 /* The maiden M covers the whole balls area, behind the marks (see MaidenMark.tsx).
    Absolutely positioned so it doesn't affect the row height; it still uses its grid
    area as its box, so it lines up with the balls. */

@@ -3,7 +3,7 @@
   --hair: #c9cfe0;
   --stripe: #dfe5e3;
   --paper: #f4f4fb;
-  --row-h: 34px;
+  --row-h: 48px;
 
   /* One template for the whole card. Rows inherit it via subgrid. */
   display: grid;
@@ -67,6 +67,76 @@
   min-height: 0;
 }
 .sc-half + .sc-half { border-top: 1px solid var(--hair); }
+
+/* Runs as scored. Each column is half the row tall, so the first line of columns fills
+   the top half and the rest wrap into the bottom one. The background draws the line
+   between the halves. */
+.sc-runs {
+  position: relative; /* so OutStrikes can measure which line it's on */
+  flex-wrap: wrap;
+  align-content: flex-start;
+  padding: 0 2px;
+  background: linear-gradient(var(--hair), var(--hair)) center / 100% 1px no-repeat;
+}
+.sc-runs-col {
+  box-sizing: border-box;
+  height: calc(var(--row-h) / 2);
+  min-width: 9px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  line-height: 1;
+}
+/* Drawn marks (wides, no balls, byes, W) sized to fit half a column. */
+.sc-runs-col .dm-mark { width: 1em; height: 1em; }
+
+/* A column with a run or mark in it: each ball takes half the column, from the top. */
+.sc-halves { justify-content: flex-start; }
+.sc-halves > .sc-ball {
+  height: 50%;
+  display: flex;
+  align-items: center;
+}
+
+/* Up to 3 dots stacked in a narrow column, so a long innings still fits. They sit at a
+   quarter, half and three quarters of the column's height, so the first and third line up
+   with the balls in a column with a run (each centred in its half), and a column of 1 or
+   2 dots lines up with a full one. */
+.sc-dots {
+  min-width: 8px;
+  justify-content: flex-start;
+  padding-top: calc(var(--row-h) / 16);
+}
+/* DotMark's dot scales with its box, so it's drawn at 14px (a dot about as big as in the
+   bowling analysis) and the empty edges are pulled in, leaving each dot a slot 8px wide
+   and a quarter of the column tall. max-width undoes the shrink-to-fit from .dm-mark,
+   which squashed the dot and pushed it left. */
+.sc-dot .dm-mark {
+  width: 14px;
+  height: 14px;
+  max-width: none;
+  margin: calc((14px - var(--row-h) / 8) / -2) -3px;
+  flex: none;
+}
+
+/* The // closing a dismissed batter's innings. It takes a column's space, and its drawing
+   hangs down over the bottom half when it's on the top line (sc-out-both). */
+.sc-out {
+  position: relative;
+  width: 10px;
+  height: calc(var(--row-h) / 2);
+  margin-left: 3px;
+}
+.sc-out svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.sc-out-both svg { height: 200%; }
 
 /* Grouped header cell: label on top, sub-labels underneath.
    It is a subgrid, so its sub-columns are the exact same tracks as the body cells,

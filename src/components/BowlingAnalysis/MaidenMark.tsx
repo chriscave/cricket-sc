@@ -1,5 +1,5 @@
 import { useId } from "react";
-import type { DeliveryMark } from "./selectors";
+import type { DeliveryMark } from "@/components/DeliveryMarks";
 
 // Centres of the 6 balls of a maiden, as % of the balls area: 2 columns of 3.
 const BALLS = [

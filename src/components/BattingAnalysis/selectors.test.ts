@@ -1,0 +1,79 @@
+import { describe, it, expect } from "vitest";
+import { toDeliveryMark } from "@/components/DeliveryMarks";
+import {
+  applyInput,
+  type DeliveryInput,
+  type InningsState,
+} from "@/types/delivery";
+import { battingColumns, isDot, selectBattingAnalysis } from "./selectors";
+
+// The marks for a run of balls, as the bowling analysis would draw them.
+const marksFor = (inputs: DeliveryInput[]) =>
+  inputs.map((input) =>
+    toDeliveryMark({
+      overNumber: 1,
+      bowlerId: 1,
+      batRuns: input.batRuns ?? 0,
+      extras: { wides: 0, noBalls: 0, byes: 0, legByes: 0, ...input.extras },
+      wicket: input.wicket,
+    }),
+  );
+
+const DOT: DeliveryInput = {};
+const BOWLED: DeliveryInput = { wicket: { batterOutId: 1, howOut: "bowled" } };
+const RUN_OUT: DeliveryInput = { wicket: { batterOutId: 1, howOut: "runOut" } };
+const WIDE: DeliveryInput = { extras: { wides: 1 } };
+const runs = (batRuns: number): DeliveryInput => ({ batRuns });
+
+// Each column as labels: "." for a dot, "+" for a wide, "W" for a bowler's wicket, or the
+// runs off the bat.
+const columnsOf = (inputs: DeliveryInput[]) =>
+  battingColumns(marksFor(inputs)).map((col) =>
+    col.map((m) =>
+      m.bowlerWicket ? "W" : m.extras.wides ? "+" : isDot(m) ? "." : String(m.batRuns),
+    ),
+  );
+
+describe("battingColumns", () => {
+  it.each<[string, DeliveryInput[], string[][]]>([
+    ["dots stack to 3", [DOT, DOT, DOT, DOT], [[".", ".", "."], ["."]]],
+    ["two runs share a column", [runs(1), runs(2)], [["1", "2"]]],
+    ["a third run starts a new column", [runs(1), runs(2), runs(3)], [["1", "2"], ["3"]]],
+    ["a run fits under one dot", [DOT, runs(1)], [[".", "1"]]],
+    ["a run after two dots gets its own column", [DOT, DOT, runs(1)], [[".", "."], ["1"]]],
+    ["a dot fits under a run", [runs(1), DOT], [["1", "."]]],
+    ["only one dot fits under a run", [runs(1), DOT, DOT], [["1", "."], ["."]]],
+    ["a wide fits under a dot", [DOT, WIDE, DOT], [[".", "+"], ["."]]],
+    ["a bowler's wicket fits under a dot", [DOT, BOWLED], [[".", "W"]]],
+    ["a run out on a dot ball stacks as a dot", [DOT, RUN_OUT], [[".", "."]]],
+  ])("%s", (_, inputs, expected) => expect(columnsOf(inputs)).toEqual(expected));
+});
+
+// Bowler 1 bowling to batters 1 and 2.
+const START: InningsState = {
+  deliveries: [],
+  batters: { 1: { deliveryIds: [] }, 2: { deliveryIds: [] } },
+  bowlers: { 1: { deliveryIds: [] } },
+  overNumber: 1,
+  currentBowlerId: 1,
+  strikerId: 1,
+  nonStrikerId: 2,
+};
+
+describe("selectBattingAnalysis", () => {
+  it("gives each ball to the batter on strike", () => {
+    const state = [DOT, { batRuns: 1 }, DOT].reduce(applyInput, START);
+    expect(selectBattingAnalysis(state)).toMatchObject([
+      { columns: [[{ batRuns: 0 }, { batRuns: 1 }]] },
+      { columns: [[{ batRuns: 0 }]] },
+    ]);
+  });
+  it("marks the batter who was bowled as out", () => {
+    const state = applyInput(START, { wicket: { batterOutId: 1, howOut: "bowled" } });
+    expect(selectBattingAnalysis(state)).toMatchObject([{ out: true }, { out: false }]);
+  });
+  it("marks a run out non-striker as out, not the batter who faced the ball", () => {
+    const state = applyInput(START, { batRuns: 1, wicket: { batterOutId: 2, howOut: "runOut" } });
+    expect(selectBattingAnalysis(state)).toMatchObject([{ out: false }, { out: true }]);
+  });
+});

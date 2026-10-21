@@ -20,7 +20,7 @@ export function WicketLetter({ x, y, size }: { x: number; y: number; size: numbe
 // A run out gets no mark of its own; the ball shows as if it hadn't happened.
 export default function WicketMark() {
   return (
-    <svg className="ba-mark" viewBox="0 0 12 12" aria-label="wicket">
+    <svg className="dm-mark" viewBox="0 0 12 12" aria-label="wicket">
       <WicketLetter x={6} y={6} size={11} />
     </svg>
   );

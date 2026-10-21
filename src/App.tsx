@@ -32,14 +32,15 @@ type PendingWicket =
   | { awaiting: "batterOut"; input: DeliveryInput; howOut: HowOut };
 
 // TODO:
-// Handle stumping off a wide
-// Other ways of being out are: 
+// In the state, one doesn't need bowlers delivery list
 // Fix breaking app when 10 wickets have fallen
 // Support for short runs
 // Support for long and short overs
 // Support for retired
 // Add runouts --> Done
 // Add wickets to command line input --> Done
+// Handle stumping off a wide --> Done
+// Other ways of being out are:  --> Done
 
 const initialInnings: InningsState = {
   deliveries: [],

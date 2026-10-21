@@ -1,4 +1,4 @@
-import type { DeliveryMark } from "./selectors";
+import type { DeliveryMark } from "./deliveryMark";
 
 // Dot layouts inside the circle, by dot count. One dot sits in the centre, two sit
 // side by side across the middle, three form a triangle (two on top, one below) and
@@ -19,7 +19,7 @@ export default function NoBallMark({ mark }: { mark: DeliveryMark }) {
   const dots = DOTS[Math.min(extraRuns, DOTS.length - 1)];
 
   return (
-    <svg className="ba-mark" viewBox="0 0 12 12" aria-label="no ball">
+    <svg className="dm-mark" viewBox="0 0 12 12" aria-label="no ball">
       <circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" strokeWidth="1" />
       {mark.batRuns > 0 ? (
         <text

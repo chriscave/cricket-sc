@@ -1,4 +1,4 @@
-import type { DeliveryMark } from "./selectors";
+import type { DeliveryMark } from "./deliveryMark";
 import { WicketLetter } from "./WicketMark";
 
 // Quadrant centres of the cross, in fill order: top-left, top-right, bottom-left,
@@ -20,7 +20,7 @@ export default function WideMark({ mark }: { mark: DeliveryMark }) {
   ].slice(0, CORNERS.length);
 
   return (
-    <svg className="ba-mark" viewBox="0 0 12 12" aria-label="wide">
+    <svg className="dm-mark" viewBox="0 0 12 12" aria-label="wide">
       <path d="M6 1V11M1 6H11" stroke="currentColor" strokeWidth="1" />
       {corners.map((c, i) => {
         const [x, y] = CORNERS[i];

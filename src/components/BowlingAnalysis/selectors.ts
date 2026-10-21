@@ -2,7 +2,7 @@ import {
   creditedToBowler,
   type Delivery,
   type InningsState,
-} from "@/types/delivery";
+} from "@/scoring";
 import { toDeliveryMark, type DeliveryMark } from "@/components/DeliveryMarks";
 
 export type Over = {

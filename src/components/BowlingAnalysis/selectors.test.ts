@@ -4,7 +4,7 @@ import {
   type DeliveryInput,
   type HowOut,
   type InningsState,
-} from "@/types/delivery";
+} from "@/scoring";
 import { selectBowlingsAnalysis } from "./selectors";
 
 // Bowler 1 bowling to batters 1 and 2, with batter 3 next in.

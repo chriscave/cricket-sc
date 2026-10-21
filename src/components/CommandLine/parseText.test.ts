@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import type { DeliveryInput } from "@/types/delivery";
+import type { DeliveryInput } from "@/scoring";
 import { parseText } from "./parseText";
 
 const parsesTo = (text: string, input: DeliveryInput) =>

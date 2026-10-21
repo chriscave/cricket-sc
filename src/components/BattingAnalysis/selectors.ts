@@ -1,5 +1,5 @@
 import { toDeliveryMark, type DeliveryMark } from "@/components/DeliveryMarks";
-import type { InningsState } from "@/types/delivery";
+import type { InningsState } from "@/scoring";
 
 // One column of a batter's runs: up to 3 dot balls stacked, or 2 balls (each in half the
 // column) once it has a run or another mark in it.

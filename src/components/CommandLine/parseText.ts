@@ -1,4 +1,4 @@
-import type { DeliveryInput } from "@/types/delivery";
+import type { DeliveryInput } from "@/scoring";
 
 export type ParseResult =
   // needsHowOut: a wicket fell, and how the batter was out still has to be chosen.

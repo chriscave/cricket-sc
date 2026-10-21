@@ -1,6 +1,6 @@
 import "./CommandLine.css";
 import { useState } from "react";
-import { validateDeliveryInput, type DeliveryInput } from "@/types/delivery";
+import { validateDeliveryInput, type DeliveryInput } from "@/scoring";
 import { parseText } from "./parseText";
 
 type CommandLineProps = {

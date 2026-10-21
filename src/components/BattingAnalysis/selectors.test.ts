@@ -4,7 +4,7 @@ import {
   applyInput,
   type DeliveryInput,
   type InningsState,
-} from "@/types/delivery";
+} from "@/scoring";
 import { battingColumns, isDot, selectBattingAnalysis } from "./selectors";
 
 // The marks for a run of balls, as the bowling analysis would draw them.

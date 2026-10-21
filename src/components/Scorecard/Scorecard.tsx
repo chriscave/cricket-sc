@@ -11,7 +11,7 @@ import RunTracker from "@/components/RunTracker";
 import BattingAnalysis, { selectBattingAnalysis } from "@/components/BattingAnalysis";
 import ScoreSummary from "@/components/ScoreSummary";
 import ScoringRate from "@/components/ScoringRate";
-import type { InningsState } from "@/types/delivery";
+import type { InningsState } from "@/scoring";
 import { selectBowlingsAnalysis } from "@/components/BowlingAnalysis";
 
 // The scorecard is laid out like a paper sheet at a fixed width, then zoomed to fill

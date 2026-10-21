@@ -1,4 +1,4 @@
-import { creditedToBowler, isLegal, type Delivery, type Extras } from "@/types/delivery";
+import { creditedToBowler, isLegal, type Delivery, type Extras } from "@/scoring";
 
 // What the analyses need to draw a ball.
 export type DeliveryMark = {

@@ -1,10 +1,7 @@
 import { describe, it, expect } from "vitest";
-import {
-  possibleDismissals,
-  validateDeliveryInput,
-  type DeliveryInput,
-  type HowOut,
-} from "./delivery";
+import { possibleDismissals, validateDeliveryInput } from "./validate";
+import type { DeliveryInput } from "./types";
+import type { HowOut } from "./dismissals";
 
 const isValid = (input: DeliveryInput) => validateDeliveryInput(input).valid;
 const out = (howOut: HowOut) => ({ batterOutId: 1, howOut });

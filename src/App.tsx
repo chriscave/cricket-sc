@@ -19,7 +19,7 @@ import {
   type DeliveryInput,
   type HowOut,
   type InningsState,
-} from "./types/delivery";
+} from "@/scoring";
 import DockPicker from "@/components/DockPicker";
 
 const howOutLabel = (h: HowOut) =>

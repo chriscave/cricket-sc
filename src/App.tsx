@@ -13,6 +13,7 @@ import {
   currentOverDeliveries,
   DISMISSALS,
   hasSixLegalDeliveries,
+  isInningsOver,
   otherEndBowlerId,
   possibleDismissals,
   previousDeliveryBowlerId,
@@ -33,7 +34,7 @@ type PendingWicket =
 
 // TODO:
 // In the state, one doesn't need bowlers delivery list
-// Fix breaking app when 10 wickets have fallen
+// Fix breaking app when 10 wickets have fallen --> Done
 // Support for short runs
 // Support for long and short overs
 // Support for retired
@@ -139,6 +140,10 @@ function App() {
             onSelect={handleBatterOut}
             onCancel={() => setPendingWicket({ awaiting: "howOut", input: pendingWicket.input })}
           />
+        ) : isInningsOver(innings) ? (
+          <div className="dock-panel" role="status">
+            Innings over: all out.
+          </div>
         ) : sixLegalDeliveries ? (
           <NextBowlers
             usedBowlers={usedBowlers}

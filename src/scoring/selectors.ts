@@ -37,3 +37,12 @@ export const previousDeliveryBowlerId = (state: InningsState) =>
 export const otherEndBowlerId = (state: InningsState) =>
   state.deliveries.findLast((d) => d.overNumber === state.overNumber - 1)
     ?.bowlerId;
+
+// The wickets that have fallen so far.
+// TODO: add support for batters retiring. A batter retired out counts as a wicket, but
+// a batter retired hurt (not out) doesn't.
+export const wicketsFallen = (state: InningsState) =>
+  state.deliveries.filter((d) => d.wicket).length;
+
+// Whether the innings has ended: 10 wickets have fallen, so the side is all out.
+export const isInningsOver = (state: InningsState) => wicketsFallen(state) >= 10;

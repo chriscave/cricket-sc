@@ -14,7 +14,6 @@ const HEADER = [
   { label: "" },
   { stack: ["4s", "6s"] },
   { label: "Balls/Min", subs: ["50", "100"] },
-  { label: "Time in" },
   { label: "How out" },
   { label: "Bowler" },
   { label: "Total" },
@@ -117,7 +116,6 @@ export default function BattingAnalysis({
           <Stack top={row.fours || undefined} bottom={row.sixes || undefined} />
           <Stack top={row.ballsTo50} />   {/* minutes underneath, once times are recorded */}
           <Stack top={row.ballsTo100} />
-          <div className="sc-cell" />  {/* time in */}
           <div className="sc-cell sc-bottom">
             {row.howOut ? DISMISSALS[row.howOut].label : row.hasBatted && "Not Out"}
           </div>

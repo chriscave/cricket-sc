@@ -14,7 +14,6 @@
     minmax(240px, 4fr)   /* runs, wide ruled area */
     28px      /* 4s/6s */
     50px 50px /* balls/min 50, 100 */
-    50px      /* time in / balls rcd */
     minmax(90px, 1fr)    /* how out */
     minmax(90px, 1fr)    /* bowler */
     76px;     /* total */

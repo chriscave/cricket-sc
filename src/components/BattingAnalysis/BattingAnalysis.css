@@ -17,7 +17,7 @@
     50px      /* time in / balls rcd */
     minmax(90px, 1fr)    /* how out */
     minmax(90px, 1fr)    /* bowler */
-    56px;     /* total */
+    76px;     /* total */
   background: var(--paper);
   border: 1px solid var(--line);
   font: 12px/1.2 system-ui, sans-serif;
@@ -49,6 +49,8 @@
 .sc-body:nth-of-type(even) { background: var(--stripe); }
 .sc-body { border-bottom: 1px solid var(--hair); }
 .sc-body .sc-num { justify-content: center; color: #8a94b0; }
+.sc-body .sc-total { justify-content: flex-end; align-items: flex-end; padding-right: 8px; }
+.sc-score { font-size: 15px; }
 
 /* Stacked cells: two halves separated by a hairline (used in body and header) */
 .sc-stack {

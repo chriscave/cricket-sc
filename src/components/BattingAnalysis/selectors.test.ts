@@ -76,4 +76,35 @@ describe("selectBattingAnalysis", () => {
     const state = applyInput(START, { batRuns: 1, wicket: { batterOutId: 2, howOut: "runOut" } });
     expect(selectBattingAnalysis(state)).toMatchObject([{ out: false }, { out: true }]);
   });
+
+  describe("total", () => {
+    // As START, with batter 3 next in.
+    const withNextIn: InningsState = { ...START, batters: { ...START.batters, 3: { deliveryIds: [] } } };
+    const totals = (...inputs: DeliveryInput[]) =>
+      selectBattingAnalysis(inputs.reduce(applyInput, withNextIn)).map((row) => row.total);
+
+    it("adds up the runs off the bat, including off a no ball", () =>
+      expect(totals(runs(4), runs(2), { batRuns: 1, extras: { noBalls: 1 } })).toEqual([7, 0, undefined]));
+    it("doesn't count byes, leg byes or wides", () =>
+      expect(
+        totals({ extras: { byes: 2 } }, { extras: { legByes: 1 } }, { extras: { wides: 3 } }),
+      ).toEqual([0, 0, undefined]));
+    it("is 0 for the batters at the crease before they face, and missing for those still to come in", () =>
+      expect(totals()).toEqual([0, 0, undefined]));
+    it("is 0 for a non-striker run out without facing", () =>
+      expect(totals({ wicket: { batterOutId: 2, howOut: "runOut" } })).toEqual([0, 0, 0]));
+  });
+
+  describe("balls faced", () => {
+    const withNextIn: InningsState = { ...START, batters: { ...START.batters, 3: { deliveryIds: [] } } };
+    const balls = (...inputs: DeliveryInput[]) =>
+      selectBattingAnalysis(inputs.reduce(applyInput, withNextIn)).map((row) => row.balls);
+
+    it("counts dots, runs, byes and no balls but not wides", () =>
+      expect(
+        balls(DOT, runs(4), { extras: { byes: 2 } }, { extras: { noBalls: 1 } }, WIDE),
+      ).toEqual([4, 0, undefined]));
+    it("is 0 for the batters at the crease before they face, and missing for those still to come in", () =>
+      expect(balls()).toEqual([0, 0, undefined]));
+  });
 });

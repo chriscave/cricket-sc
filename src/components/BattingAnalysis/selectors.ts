@@ -6,7 +6,14 @@ import type { InningsState } from "@/scoring";
 export type BattingColumn = DeliveryMark[];
 
 // out: the batter has been dismissed, so their runs are closed off.
-export type BatterRow = { columns: BattingColumn[]; out: boolean };
+// total: their runs off the bat, or undefined if they haven't batted yet.
+// balls: balls faced (everything but wides), or undefined if they haven't batted yet.
+export type BatterRow = {
+  columns: BattingColumn[];
+  out: boolean;
+  total?: number;
+  balls?: number;
+};
 
 // A ball drawn as a plain dot (see renderMark).
 export const isDot = (m: DeliveryMark) =>
@@ -30,8 +37,17 @@ export function battingColumns(marks: DeliveryMark[]): BattingColumn[] {
 // run out.
 export function selectBattingAnalysis(state: InningsState): BatterRow[] {
   const outIds = new Set(state.deliveries.flatMap((d) => (d.wicket ? [d.wicket.batterOutId] : [])));
-  return Object.entries(state.batters).map(([id, b]) => ({
-    columns: battingColumns(b.deliveryIds.map((i) => toDeliveryMark(state.deliveries[i]))),
-    out: outIds.has(Number(id)),
-  }));
+  const atCrease = [state.strikerId, state.nonStrikerId];
+  return Object.entries(state.batters).map(([key, b]) => {
+    const id = Number(key);
+    const deliveries = b.deliveryIds.map((i) => state.deliveries[i]);
+    const out = outIds.has(id);
+    const batted = deliveries.length > 0 || out || atCrease.includes(id);
+    return {
+      columns: battingColumns(deliveries.map(toDeliveryMark)),
+      out,
+      total: batted ? deliveries.reduce((sum, d) => sum + d.batRuns, 0) : undefined,
+      balls: batted ? deliveries.filter((d) => d.extras.wides === 0).length : undefined,
+    };
+  });
 }

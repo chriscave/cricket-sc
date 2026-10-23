@@ -3,23 +3,6 @@ import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { renderMark } from "@/components/DeliveryMarks";
 import { isDot, type BatterRow, type BattingColumn } from "./selectors";
 
-// Body columns. Order MUST match grid-template-columns in the CSS.
-// `split: [topKey, bottomKey]` renders the cell as two stacked halves.
-const COLUMNS = [
-  { key: "num", cls: "sc-num" },
-  { key: "name" },
-  { key: "in",    split: ["inTime", "inOver"] },
-  { key: "out",   split: ["outTime", "outOver"] },
-  { key: "runs" },
-  { key: "fours", split: ["fours", "sixes"] },
-  { key: "b50",   split: ["b50Balls", "b50Min"] },
-  { key: "b100",  split: ["b100Balls", "b100Min"] },
-  { key: "timeIn" },
-  { key: "how" },
-  { key: "bowler" },
-  { key: "total" },
-];
-
 // Header cells, one per column, except grouped ones that span several.
 //   subs:  a label on top with sub-labels underneath, one per spanned column
 //   stack: two labels stacked in one column (4s over 6s)
@@ -55,9 +38,15 @@ function HeaderCell({ h }) {
   return <div className="sc-cell">{h.label}</div>;
 }
 
-// Only the runs column has data so far. The other columns are looked up by key and stay
-// blank until their fields are added to BatterRow.
-const field = (row: object, key: string) => (row as Record<string, ReactNode>)[key];
+// A cell split into two stacked halves.
+function Stack({ top, bottom }: { top?: ReactNode; bottom?: ReactNode }) {
+  return (
+    <div className="sc-cell sc-stack">
+      <span className="sc-half">{top}</span>
+      <span className="sc-half">{bottom}</span>
+    </div>
+  );
+}
 
 // The runs as scored, one column per 3 dot balls, or 2 balls once a run or another mark
 // is in it. The columns fill the top half left to right, then wrap into the bottom half.
@@ -116,22 +105,27 @@ export default function BattingAnalysis({
         {HEADER.map((h, i) => <HeaderCell key={i} h={h} />)}
       </div>
 
+      {/* Cells in order. MUST match grid-template-columns in the CSS. */}
       {rows.map((row, i) => (
         <div key={i} className="sc-row sc-body">
-          {COLUMNS.map((c) =>
-            c.split ? (
-              <div key={c.key} className="sc-cell sc-stack">
-                <span className="sc-half">{field(row, c.split[0])}</span>
-                <span className="sc-half">{field(row, c.split[1])}</span>
-              </div>
-            ) : c.key === "runs" ? (
-              <RunsCell key={c.key} columns={row.columns ?? []} out={row.out ?? false} />
-            ) : (
-              <div key={c.key} className={`sc-cell ${c.cls ?? ""}`}>
-                {c.key === "num" ? i + 1 : field(row, c.key)}
-              </div>
-            )
-          )}
+          <div className="sc-cell sc-num">{i + 1}</div>
+          <div className="sc-cell" />  {/* name */}
+          <Stack />                    {/* in: time, over */}
+          <Stack />                    {/* out: time, over */}
+          <RunsCell columns={row.columns ?? []} out={row.out ?? false} />
+          <Stack />                    {/* 4s, 6s */}
+          <Stack />                    {/* 50: balls, minutes */}
+          <Stack />                    {/* 100: balls, minutes */}
+          <div className="sc-cell" />  {/* time in */}
+          <div className="sc-cell" />  {/* how out */}
+          <div className="sc-cell" />  {/* bowler */}
+          <div className="sc-cell sc-total">
+            {row.total !== undefined && (
+              <span>
+                <span className="sc-score">{row.total}</span> ({row.balls})
+              </span>
+            )}
+          </div>
         </div>
       ))}
 

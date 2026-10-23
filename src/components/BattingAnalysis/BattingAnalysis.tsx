@@ -1,6 +1,7 @@
 import "./BattingAnalysis.css";
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { renderMark } from "@/components/DeliveryMarks";
+import { DISMISSALS } from "@/scoring";
 import { isDot, type BatterRow, type BattingColumn } from "./selectors";
 
 // Header cells, one per column, except grouped ones that span several.
@@ -110,17 +111,19 @@ export default function BattingAnalysis({
         <div key={i} className="sc-row sc-body">
           <div className="sc-cell sc-num">{i + 1}</div>
           <div className="sc-cell" />  {/* name */}
-          <Stack />                    {/* in: time, over */}
-          <Stack />                    {/* out: time, over */}
-          <RunsCell columns={row.columns ?? []} out={row.out ?? false} />
-          <Stack />                    {/* 4s, 6s */}
-          <Stack />                    {/* 50: balls, minutes */}
-          <Stack />                    {/* 100: balls, minutes */}
+          <Stack bottom={row.overIn} />   {/* time above, once times are recorded */}
+          <Stack bottom={row.overOut} />
+          <RunsCell columns={row.columns ?? []} out={row.howOut !== undefined} />
+          <Stack top={row.fours || undefined} bottom={row.sixes || undefined} />
+          <Stack top={row.ballsTo50} />   {/* minutes underneath, once times are recorded */}
+          <Stack top={row.ballsTo100} />
           <div className="sc-cell" />  {/* time in */}
-          <div className="sc-cell" />  {/* how out */}
-          <div className="sc-cell" />  {/* bowler */}
+          <div className="sc-cell sc-bottom">
+            {row.howOut ? DISMISSALS[row.howOut].label : row.hasBatted && "Not Out"}
+          </div>
+          <div className="sc-cell sc-bottom">{row.bowlerId && `Bowler ${row.bowlerId}`}</div>
           <div className="sc-cell sc-total">
-            {row.total !== undefined && (
+            {row.hasBatted && (
               <span>
                 <span className="sc-score">{row.total}</span> ({row.balls})
               </span>

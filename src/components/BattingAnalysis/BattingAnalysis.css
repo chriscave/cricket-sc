@@ -49,6 +49,8 @@
 .sc-body:nth-of-type(even) { background: var(--stripe); }
 .sc-body { border-bottom: 1px solid var(--hair); }
 .sc-body .sc-num { justify-content: center; color: #8a94b0; }
+/* Text written on the row's bottom line, like a figure in a ruled book. */
+.sc-body .sc-bottom { align-items: flex-end; }
 .sc-body .sc-total { justify-content: flex-end; align-items: flex-end; padding-right: 8px; }
 .sc-score { font-size: 15px; }
 

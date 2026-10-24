@@ -7,7 +7,7 @@ import MatchOfficials from "@/components/MatchOfficials";
 import MatchResult from "@/components/MatchResult";
 import NotesRemarks from "@/components/NotesRemarks";
 import RunMilestones from "@/components/RunMilestones";
-import RunTracker from "@/components/RunTracker";
+import RunTracker, { selectRunTracker } from "@/components/RunTracker";
 import BattingAnalysis, { selectBattingAnalysis } from "@/components/BattingAnalysis";
 import ScoreSummary from "@/components/ScoreSummary";
 import ScoringRate from "@/components/ScoringRate";
@@ -52,7 +52,7 @@ export default function Scorecard({ inningsState }: ScorecardProps) {
         </div>
         <div className="tracker-row">
           <div className="grow">
-            <RunTracker />
+            <RunTracker {...selectRunTracker(inningsState)} />
           </div>
           <RunMilestones />
           <MatchOfficials />

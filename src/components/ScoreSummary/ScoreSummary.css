@@ -1,9 +1,11 @@
 .score-summary {
   --line: #7d8a86;
   --hair: #c9cfe0;
+  --stripe: #dfe5e3;
   --paper: #f4f4fb;
   --row-h: 26px;
   --label-w: 96px;
+  --row-total-w: 44px;
   --total-label-w: 84px;
   --total-value-w: 76px;
 
@@ -16,13 +18,15 @@
   color: #444;
 }
 
-/* One grid: 6 rows on the left, and each totals entry spans two of them.
+/* One grid of 15 thin rows: each of the 5 extras rows spans 3 and each of the 3 totals
+   spans 5, so both blocks fill the same height.
    Each line/total wrapper is a subgrid, so its cells use these exact columns. */
 .ss-grid {
   flex: 1; /* take all the height the footer doesn't need */
   display: grid;
-  grid-template-columns: var(--label-w) minmax(180px, 1fr) var(--total-label-w) var(--total-value-w);
-  grid-template-rows: repeat(6, minmax(var(--row-h), 1fr));
+  grid-template-columns:
+    var(--label-w) minmax(180px, 1fr) var(--row-total-w) var(--total-label-w) var(--total-value-w);
+  grid-template-rows: repeat(15, minmax(calc(var(--row-h) / 3), 1fr));
 }
 
 .ss-line,
@@ -31,10 +35,13 @@
   grid-template-columns: subgrid;
   border-bottom: 1px solid var(--hair);
 }
-.ss-line { grid-column: 1 / 3; }
-.ss-total { grid-column: 3 / 5; }
+.ss-line { grid-column: 1 / 4; }
+.ss-total { grid-column: 4 / 6; }
+/* Extras rows: zebra striping like the batting analysis, so it's clear which two lines
+   belong to which row. The six rows are the grid's first children. */
+.ss-line:nth-child(even) { background: var(--stripe); }
 .ss-total:last-child,
-.ss-line:nth-child(6) { border-bottom: 0; } /* the footer draws the closing line */
+.ss-line:nth-child(5) { border-bottom: 0; } /* the footer draws the closing line */
 
 .ss-cell {
   border-left: 1px solid var(--line);
@@ -45,7 +52,31 @@
   text-align: center;
 }
 .ss-label { border-left: 0; }
-.ss-tally { justify-content: flex-start; }
+
+/* Extras as scored, like the runs in the batting analysis: each row is split into two
+   lines, and the marks go along the top one and wrap onto the bottom when it's full.
+   The background draws the line between them. */
+.ss-tally {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  column-gap: 3px; /* crammed in, as a scorer would, but not run together */
+  padding: 0 2px;
+  background: linear-gradient(var(--hair), var(--hair)) center / 100% 1px no-repeat;
+}
+.ss-tally > span {
+  height: 50%;
+  display: flex;
+  align-items: center;
+  line-height: 1;
+}
+
+/* Scores at the size of a batter's total, written on the bottom line of their box. The
+   labels on the right sit on the line too, beside their totals. */
+.ss-score,
+.ss-total-value { font-size: 15px; }
+.ss-score,
+.ss-total .ss-cell { align-items: flex-end; padding-bottom: 2px; }
 
 /* Totals: heavier line on their left edge, as in the book */
 .ss-total-label { border-left: 2px solid var(--line); }

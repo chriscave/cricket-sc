@@ -9,7 +9,7 @@ import NotesRemarks from "@/components/NotesRemarks";
 import RunMilestones from "@/components/RunMilestones";
 import RunTracker, { selectRunTracker } from "@/components/RunTracker";
 import BattingAnalysis, { selectBattingAnalysis } from "@/components/BattingAnalysis";
-import ScoreSummary from "@/components/ScoreSummary";
+import ScoreSummary, { selectScoreSummary } from "@/components/ScoreSummary";
 import ScoringRate from "@/components/ScoringRate";
 import type { InningsState } from "@/scoring";
 import { selectBowlingsAnalysis } from "@/components/BowlingAnalysis";
@@ -48,7 +48,7 @@ export default function Scorecard({ inningsState }: ScorecardProps) {
         <BattingAnalysis innings={selectBattingAnalysis(inningsState)} />
         <div className="fow-and-score">
           <FallOfWickets />
-          <ScoreSummary />
+          <ScoreSummary {...selectScoreSummary(inningsState)} />
         </div>
         <div className="tracker-row">
           <div className="grow">

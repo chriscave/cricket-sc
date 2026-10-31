@@ -14,6 +14,7 @@
     minmax(240px, 4fr)   /* runs, wide ruled area */
     28px      /* 4s/6s */
     50px 50px /* balls/min 50, 100 */
+    32px      /* minutes batted */
     minmax(90px, 1fr)    /* how out */
     minmax(90px, 1fr)    /* bowler */
     76px;     /* total */
@@ -53,6 +54,7 @@
 /* Text written on the row's bottom line, like a figure in a ruled book. */
 .sc-body .sc-bottom { align-items: flex-end; }
 .sc-body .sc-total { justify-content: flex-end; align-items: flex-end; padding-right: 8px; }
+.sc-body .sc-minutes { justify-content: center; align-items: flex-end; } /* on the bottom line */
 .sc-score { font-size: 15px; }
 .sc-time { font-size: 10px; } /* small enough for 14:05 to fit the In and Out columns */
 

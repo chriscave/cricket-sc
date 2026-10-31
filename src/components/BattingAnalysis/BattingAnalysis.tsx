@@ -1,6 +1,7 @@
 import "./BattingAnalysis.css";
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { renderMark } from "@/components/DeliveryMarks";
+import Clock from "@/components/Clock";
 import { DISMISSALS } from "@/scoring";
 import { isDot, type BatterRow, type BattingColumn } from "./selectors";
 
@@ -14,6 +15,7 @@ const HEADER = [
   { label: "" },
   { stack: ["4s", "6s"] },
   { label: "Balls/Min", subs: ["50", "100"] },
+  { label: "Min" },
   { label: "How out" },
   { label: "Bowler" },
   { label: "Total" },
@@ -69,13 +71,6 @@ function OutStrikes() {
   );
 }
 
-// A time on a 24 hour clock, e.g. 14:05.
-function Time({ at }: { at?: number }) {
-  if (at === undefined) return null;
-  const clock = new Date(at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-  return <span className="sc-time">{clock}</span>;
-}
-
 function RunsCell({ columns, out }: { columns: BattingColumn[]; out: boolean }) {
   return (
     <div className="sc-cell sc-runs">
@@ -120,12 +115,13 @@ export default function BattingAnalysis({
             {row.onStrike && <span className="sc-strike" aria-label="on strike">†</span>}
           </div>
           <div className="sc-cell" />  {/* name */}
-          <Stack top={<Time at={row.timeIn} />} bottom={row.overIn} />
-          <Stack top={<Time at={row.timeOut} />} bottom={row.overOut} />
+          <Stack top={<Clock at={row.timeIn} className="sc-time" />} bottom={row.overIn} />
+          <Stack top={<Clock at={row.timeOut} className="sc-time" />} bottom={row.overOut} />
           <RunsCell columns={row.columns ?? []} out={row.howOut !== undefined} />
           <Stack top={row.fours || undefined} bottom={row.sixes || undefined} />
-          <Stack top={row.ballsTo50} />   {/* minutes underneath, once times are recorded */}
-          <Stack top={row.ballsTo100} />
+          <Stack top={row.ballsTo50} bottom={row.minutesTo50} />
+          <Stack top={row.ballsTo100} bottom={row.minutesTo100} />
+          <div className="sc-cell sc-minutes">{row.minutes}</div>
           <div className="sc-cell sc-bottom">
             {row.howOut ? DISMISSALS[row.howOut].label : row.hasBatted && "Not Out"}
           </div>

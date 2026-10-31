@@ -1,5 +1,6 @@
 import "./FallOfWickets.css";
 import type { ReactNode } from "react";
+import Clock from "@/components/Clock";
 import type { FallOfWicket } from "./selectors";
 
 const WICKETS = Array.from({ length: 10 }, (_, i) => i);
@@ -13,7 +14,15 @@ const ROWS: { label: string; cell: (w: FallOfWicket) => ReactNode }[] = [
     // One span, so the small balls sit on the same baseline as the runs.
     cell: (w) => <span>{w.partnership.runs}&nbsp;<span className="fw-balls">({w.partnership.balls})</span></span>,
   },
-  { label: "Time/over no.", cell: (w) => w.over }, // time above, once times are recorded
+  {
+    label: "Over no./time",
+    cell: (w) => (
+      <span className="fw-time-over">
+        {w.over}
+        <Clock at={w.time} className="fw-time" />
+      </span>
+    ),
+  },
 ];
 
 // wickets: from selectFallOfWickets, index 0 = 1st wicket.

@@ -20,10 +20,14 @@ export type BattingColumn = DeliveryMark[];
 //   undefined if they haven't come in yet.
 // overOut: the over and ball they were out on, or undefined if they're not out.
 // total: runs off the bat. balls: balls faced (see isBallFaced).
+// minutes: minutes batted, from when they came in to the ball they were out on.
+//   Undefined if they're not out.
 // fours, sixes: boundaries hit.
 // timeIn: when they came in. timeOut: the time of the ball they were out on. Each is
 //   undefined until it's happened.
 // ballsTo50, ballsTo100: balls faced to reach that score, or undefined if they haven't.
+// minutesTo50, minutesTo100: minutes from when they came in to the ball that took them
+//   there, or undefined if they haven't got there.
 export type BatterRow = {
   columns: BattingColumn[];
   hasBatted: boolean;
@@ -36,10 +40,13 @@ export type BatterRow = {
   timeOut?: number;
   total: number;
   balls: number;
+  minutes?: number;
   fours: number;
   sixes: number;
   ballsTo50?: number;
   ballsTo100?: number;
+  minutesTo50?: number;
+  minutesTo100?: number;
 };
 
 // A ball drawn as a plain dot (see renderMark).
@@ -62,18 +69,22 @@ export function battingColumns(marks: DeliveryMark[]): BattingColumn[] {
 // One row per batter, in batting order: every ball bowled while they were on strike.
 // Who is out comes from the wicket, not who faced the ball, because a non-striker can be
 // run out.
-// Balls faced up to and including the one that took the batter to
-// `target` runs, or undefined if they haven't got there.
-function ballsToReach(deliveries: Delivery[], target: number): number | undefined {
+// The ball that took the batter to `target` runs: the balls they'd faced by then,
+// counting it, and when it was entered. Undefined if they haven't got there.
+function reach(deliveries: Delivery[], target: number) {
   let runs = 0;
   let balls = 0;
   for (const d of deliveries) {
     if (isBallFaced(d)) balls++;
     runs += d.batRuns;
-    if (runs >= target) return balls;
+    if (runs >= target) return { balls, time: d.time };
   }
   return undefined;
 }
+
+// Minutes between two times as read off a clock: 14:00 to 14:35 is 35, whatever the seconds.
+const clockMinutes = (from: number, to: number) =>
+  Math.floor(to / 60_000) - Math.floor(from / 60_000);
 
 export function selectBattingAnalysis(state: InningsState): BatterRow[] {
   const atCrease = [state.strikerId, state.nonStrikerId];
@@ -89,6 +100,10 @@ export function selectBattingAnalysis(state: InningsState): BatterRow[] {
     const wicketBall = outBall === -1 ? undefined : state.deliveries[outBall];
     const howOut = wicketBall?.wicket?.howOut;
     const hits = (runs: number) => deliveries.filter((d) => d.batRuns === runs).length;
+    const to50 = reach(deliveries, 50);
+    const to100 = reach(deliveries, 100);
+    const minutesTo = (time?: number) =>
+      time === undefined || b.timeIn === undefined ? undefined : clockMinutes(b.timeIn, time);
     return {
       columns: battingColumns(deliveries.map(toDeliveryMark)),
       hasBatted: deliveries.length > 0 || howOut !== undefined || atCrease.includes(id),
@@ -104,10 +119,13 @@ export function selectBattingAnalysis(state: InningsState): BatterRow[] {
       timeOut: wicketBall?.time,
       total: deliveries.reduce((sum, d) => sum + d.batRuns, 0),
       balls: deliveries.filter(isBallFaced).length,
+      minutes: minutesTo(wicketBall?.time),
       fours: hits(4),
       sixes: hits(6),
-      ballsTo50: ballsToReach(deliveries, 50),
-      ballsTo100: ballsToReach(deliveries, 100),
+      ballsTo50: to50?.balls,
+      ballsTo100: to100?.balls,
+      minutesTo50: minutesTo(to50?.time),
+      minutesTo100: minutesTo(to100?.time),
     };
   });
 }

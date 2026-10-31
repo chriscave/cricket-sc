@@ -1,11 +1,11 @@
 import "./CommandLine.css";
 import { useState } from "react";
-import { validateDeliveryInput, type DeliveryInput } from "@/scoring";
+import { validateDeliveryInput, type TypedBall } from "@/scoring";
 import { parseText } from "./parseText";
 
 type CommandLineProps = {
   // needsHowOut: the ball took a wicket and how the batter was out is still to be chosen.
-  onInput: (input: DeliveryInput, needsHowOut: boolean) => void;
+  onInput: (input: TypedBall, needsHowOut: boolean) => void;
 };
 
 // Where balls are typed. It's hidden while the scorer is making a choice in another

@@ -1,25 +1,39 @@
 import { toDeliveryMark, type DeliveryMark } from "@/components/DeliveryMarks";
-import { creditedToBowler, type Delivery, type HowOut, type InningsState } from "@/scoring";
+import {
+  creditedToBowler,
+  isBallFaced,
+  oversAt,
+  type Delivery,
+  type HowOut,
+  type InningsState,
+} from "@/scoring";
 
 // One column of a batter's runs: up to 3 dot balls stacked, or 2 balls (each in half the
 // column) once it has a run or another mark in it.
 export type BattingColumn = DeliveryMark[];
 
 // hasBatted: they've come in: they're at the crease, have faced a ball, or are out.
+// onStrike: they're the batter on strike now.
 // howOut: how the batter was dismissed, or undefined if they're not out.
 // bowlerId: the bowler credited with the wicket, if any (not for a run out).
-// overIn: the over they came in, or undefined if they haven't yet.
-// overOut: the over they were out in, or undefined if they're not out.
-// total: runs off the bat. balls: balls faced (everything but wides).
+// overIn: the over and ball they came in at (see oversAt): "0.0" for the openers, or
+//   undefined if they haven't come in yet.
+// overOut: the over and ball they were out on, or undefined if they're not out.
+// total: runs off the bat. balls: balls faced (see isBallFaced).
 // fours, sixes: boundaries hit.
+// timeIn: when they came in. timeOut: the time of the ball they were out on. Each is
+//   undefined until it's happened.
 // ballsTo50, ballsTo100: balls faced to reach that score, or undefined if they haven't.
 export type BatterRow = {
   columns: BattingColumn[];
   hasBatted: boolean;
+  onStrike: boolean;
   howOut?: HowOut;
   bowlerId?: number;
-  overIn?: number;
-  overOut?: number;
+  overIn?: string;
+  overOut?: string;
+  timeIn?: number;
+  timeOut?: number;
   total: number;
   balls: number;
   fours: number;
@@ -48,13 +62,13 @@ export function battingColumns(marks: DeliveryMark[]): BattingColumn[] {
 // One row per batter, in batting order: every ball bowled while they were on strike.
 // Who is out comes from the wicket, not who faced the ball, because a non-striker can be
 // run out.
-// Balls faced (not counting wides) up to and including the one that took the batter to
+// Balls faced up to and including the one that took the batter to
 // `target` runs, or undefined if they haven't got there.
 function ballsToReach(deliveries: Delivery[], target: number): number | undefined {
   let runs = 0;
   let balls = 0;
   for (const d of deliveries) {
-    if (d.extras.wides === 0) balls++;
+    if (isBallFaced(d)) balls++;
     runs += d.batRuns;
     if (runs >= target) return balls;
   }
@@ -63,26 +77,33 @@ function ballsToReach(deliveries: Delivery[], target: number): number | undefine
 
 export function selectBattingAnalysis(state: InningsState): BatterRow[] {
   const atCrease = [state.strikerId, state.nonStrikerId];
-  const wicketBalls = state.deliveries.filter((d) => d.wicket);
+  // Where each wicket fell, as indexes into the deliveries.
+  const wicketBalls = state.deliveries.flatMap((d, i) => (d.wicket ? [i] : []));
+  const oversAtBall = (i: number | undefined) =>
+    i === undefined || i === -1 ? undefined : oversAt(state, i);
   return Object.entries(state.batters).map(([key, b]) => {
     const id = Number(key);
     const deliveries = b.deliveryIds.map((i) => state.deliveries[i]);
     // The ball they were out on. Not always one they faced: a non-striker can be run out.
-    const wicketBall = state.deliveries.find((d) => d.wicket?.batterOutId === id);
+    const outBall = state.deliveries.findIndex((d) => d.wicket?.batterOutId === id);
+    const wicketBall = outBall === -1 ? undefined : state.deliveries[outBall];
     const howOut = wicketBall?.wicket?.howOut;
     const hits = (runs: number) => deliveries.filter((d) => d.batRuns === runs).length;
     return {
       columns: battingColumns(deliveries.map(toDeliveryMark)),
       hasBatted: deliveries.length > 0 || howOut !== undefined || atCrease.includes(id),
+      onStrike: state.strikerId === id,
       howOut,
       bowlerId: howOut && creditedToBowler(howOut) ? wicketBall?.bowlerId : undefined,
       // 1 and 2 open; after that, batter n comes in at the (n - 2)th wicket.
       // TODO: a batter retiring also brings in the next batter, so count retirements
       // here too once retiring is supported.
-      overIn: id <= 2 ? 1 : wicketBalls[id - 3]?.overNumber,
-      overOut: wicketBall?.overNumber,
+      overIn: id <= 2 ? "0.0" : oversAtBall(wicketBalls[id - 3]),
+      overOut: oversAtBall(outBall),
+      timeIn: b.timeIn,
+      timeOut: wicketBall?.time,
       total: deliveries.reduce((sum, d) => sum + d.batRuns, 0),
-      balls: deliveries.filter((d) => d.extras.wides === 0).length,
+      balls: deliveries.filter(isBallFaced).length,
       fours: hits(4),
       sixes: hits(6),
       ballsTo50: ballsToReach(deliveries, 50),

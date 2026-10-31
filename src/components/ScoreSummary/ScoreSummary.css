@@ -77,30 +77,41 @@
 .ss-total-value { font-size: 15px; }
 .ss-score,
 .ss-total .ss-cell { align-items: flex-end; padding-bottom: 2px; }
+.ss-total .ss-total-label { padding-bottom: 3px; } /* smaller text: lift it level with the totals */
+.ss-bold .ss-total-value { font-size: 17px; } /* the grand total, as large as the footer */
 
 /* Totals: heavier line on their left edge, as in the book */
 .ss-total-label { border-left: 2px solid var(--line); }
 .ss-bold { font-weight: 700; }
 
-/* Footer: "For __ Wickets in __ Overs in __ Minutes __" */
+/* Footer: "FOR __ WICKETS IN __ OVERS IN __ MINUTES", in large capitals */
 .ss-footer {
   display: flex;
   border-top: 1px solid var(--line);
   min-height: 30px;
+  font-size: 17px;
+  text-transform: uppercase;
+}
+/* FOR sits under the extras labels, pushed right so it runs into the first blank. */
+.ss-for {
+  flex: 0 0 var(--label-w);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
 }
 .ss-pair {
-  flex: 1;
+  flex: auto; /* the words take what they need; the blanks share the rest equally */
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 0 8px;
 }
-.ss-pair:first-child {
-  flex: 0 0 var(--label-w);
-  box-sizing: border-box;
-  justify-content: center;
-  padding: 0;
-  border-right: 1px solid var(--line);
+.ss-pair-value {
+  flex: 1;
+  min-height: 1em;
+  border-bottom: 1px solid var(--hair);
+  text-align: center;
+  font-size: 18px;
 }
-.ss-pair:first-child .ss-pair-value { display: none; }
-.ss-pair-value { flex: 1; min-height: 1em; border-bottom: 1px solid var(--hair); }

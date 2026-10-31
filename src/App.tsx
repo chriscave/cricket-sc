@@ -20,6 +20,7 @@ import {
   type DeliveryInput,
   type HowOut,
   type InningsState,
+  type TypedBall,
 } from "@/scoring";
 import DockPicker from "@/components/DockPicker";
 
@@ -87,8 +88,13 @@ function App() {
   const nonStrikerId = batsmanOffStrike(innings);
   const handleInput = (input: DeliveryInput) =>
     setInnings((prev) => applyInput(prev, input));
-  const handleCommand = (input: DeliveryInput, needsHowOut: boolean) =>
-    needsHowOut ? setPendingWicket({ awaiting: "howOut", input }) : handleInput(input);
+  // The ball is timed when the scorer enters it, so a wicket keeps that time while how
+  // out is chosen.
+  const handleCommand = (ball: TypedBall, needsHowOut: boolean) => {
+    const input = { ...ball, time: Date.now() };
+    if (needsHowOut) setPendingWicket({ awaiting: "howOut", input });
+    else handleInput(input);
+  };
   const recordWicket = (input: DeliveryInput, howOut: HowOut, batterOutId: number) => {
     handleInput({ ...input, wicket: { batterOutId, howOut } });
     setPendingWicket(null);

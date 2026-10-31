@@ -69,6 +69,13 @@ function OutStrikes() {
   );
 }
 
+// A time on a 24 hour clock, e.g. 14:05.
+function Time({ at }: { at?: number }) {
+  if (at === undefined) return null;
+  const clock = new Date(at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  return <span className="sc-time">{clock}</span>;
+}
+
 function RunsCell({ columns, out }: { columns: BattingColumn[]; out: boolean }) {
   return (
     <div className="sc-cell sc-runs">
@@ -108,10 +115,13 @@ export default function BattingAnalysis({
       {/* Cells in order. MUST match grid-template-columns in the CSS. */}
       {rows.map((row, i) => (
         <div key={i} className="sc-row sc-body">
-          <div className="sc-cell sc-num">{i + 1}</div>
+          <div className="sc-cell sc-num">
+            {i + 1}
+            {row.onStrike && <span className="sc-strike" aria-label="on strike">†</span>}
+          </div>
           <div className="sc-cell" />  {/* name */}
-          <Stack bottom={row.overIn} />   {/* time above, once times are recorded */}
-          <Stack bottom={row.overOut} />
+          <Stack top={<Time at={row.timeIn} />} bottom={row.overIn} />
+          <Stack top={<Time at={row.timeOut} />} bottom={row.overOut} />
           <RunsCell columns={row.columns ?? []} out={row.howOut !== undefined} />
           <Stack top={row.fours || undefined} bottom={row.sixes || undefined} />
           <Stack top={row.ballsTo50} />   {/* minutes underneath, once times are recorded */}

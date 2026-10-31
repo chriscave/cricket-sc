@@ -1,5 +1,5 @@
 import { DISMISSALS, type HowOut } from "./dismissals";
-import { NO_EXTRAS, type DeliveryInput } from "./types";
+import { NO_EXTRAS, type TypedBall } from "./types";
 
 type ValidationResult = { valid: true } | { valid: false; errors: string[] };
 
@@ -7,7 +7,7 @@ const isCount = (n: number) => Number.isInteger(n) && n >= 0;
 
 // Checks a delivery makes sense on its own, and returns every problem found, not just
 // the first.
-export function validateDeliveryInput(input: DeliveryInput): ValidationResult {
+export function validateDeliveryInput(input: TypedBall): ValidationResult {
   const errors: string[] = [];
   const batRuns = input.batRuns ?? 0;
   const { wides, noBalls, byes, legByes } = { ...NO_EXTRAS, ...input.extras };
@@ -47,7 +47,7 @@ export function validateDeliveryInput(input: DeliveryInput): ValidationResult {
 }
 
 // The ways a batter could have been out on this ball, in the order of DISMISSALS.
-export const possibleDismissals = (input: DeliveryInput): HowOut[] =>
+export const possibleDismissals = (input: TypedBall): HowOut[] =>
   (Object.keys(DISMISSALS) as HowOut[]).filter(
     (howOut) =>
       validateDeliveryInput({ ...input, wicket: { batterOutId: 0, howOut } }).valid,

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   applyInput,
-  type DeliveryInput,
+  type TypedBall,
   type HowOut,
   type InningsState,
 } from "@/scoring";
@@ -18,9 +18,13 @@ const START: InningsState = {
   nonStrikerId: 2,
 };
 
+// Records the balls in order, a minute apart from time 0.
+const play = (state: InningsState, ...balls: TypedBall[]) =>
+  balls.reduce((s, ball, i) => applyInput(s, { ...ball, time: i * 60_000 }), state);
+
 // Bowler 1's mark for a single ball on which the striker was out, and their wickets.
-const afterWicket = (howOut: HowOut, input: DeliveryInput = {}) => {
-  const state = applyInput(START, { ...input, wicket: { batterOutId: 1, howOut } });
+const afterWicket = (howOut: HowOut, input: TypedBall = {}) => {
+  const state = play(START, { ...input, wicket: { batterOutId: 1, howOut } });
   const [row] = selectBowlingsAnalysis(state);
   return { bowlerWicket: row.oversAnalysis[0].deliveryMarks[0].bowlerWicket, wkts: row.wkts };
 };

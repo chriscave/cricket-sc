@@ -1,7 +1,7 @@
 import "./Scorecard.css";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import BowlingAnalysis from "@/components/BowlingAnalysis";
-import FallOfWickets from "@/components/FallOfWickets";
+import FallOfWickets, { selectFallOfWickets } from "@/components/FallOfWickets";
 import MatchHeader from "@/components/MatchHeader";
 import MatchOfficials from "@/components/MatchOfficials";
 import MatchResult from "@/components/MatchResult";
@@ -47,7 +47,7 @@ export default function Scorecard({ inningsState }: ScorecardProps) {
         <MatchHeader />
         <BattingAnalysis innings={selectBattingAnalysis(inningsState)} />
         <div className="fow-and-score">
-          <FallOfWickets />
+          <FallOfWickets wickets={selectFallOfWickets(inningsState)} />
           <ScoreSummary {...selectScoreSummary(inningsState)} />
         </div>
         <div className="tracker-row">

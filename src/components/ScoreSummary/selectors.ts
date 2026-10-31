@@ -1,4 +1,4 @@
-import type { Extras, InningsState } from "@/scoring";
+import { oversBowled, wicketsFallen, type Extras, type InningsState } from "@/scoring";
 
 type ExtraKind = keyof Extras | "penalty";
 
@@ -7,10 +7,13 @@ type ExtraKind = keyof Extras | "penalty";
 // extras: each row's tally added up.
 // totals: sTotal is the sub-total, runs off the bat (the batters' scores added up).
 //   extras is all the extras added up. gTotal is the grand total: the two added together.
+// footer: the wickets fallen and overs bowled, for "FOR __ WICKETS IN __ OVERS". minutes
+//   is left out until times are recorded.
 export type ScoreSummaryData = {
   tally: Record<ExtraKind, number[]>;
   extras: Record<ExtraKind, number>;
   totals: { sTotal: number; extras: number; gTotal: number };
+  footer: { wickets: number; overs: string; minutes?: number };
 };
 
 const add = (runs: number[]) => runs.reduce((sum, r) => sum + r, 0);
@@ -38,5 +41,6 @@ export function selectScoreSummary(state: InningsState): ScoreSummaryData {
     tally,
     extras,
     totals: { sTotal, extras: totalExtras, gTotal: sTotal + totalExtras },
+    footer: { wickets: wicketsFallen(state), overs: oversBowled(state) },
   };
 }

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { apply, applyInput, input2Event } from "./apply";
-import type { DeliveryInput, InningsState } from "./types";
+import { apply, applyInput, input2Events } from "./apply";
+import type { TypedBall, InningsState } from "./types";
 
 const players = (n: number) =>
   Object.fromEntries(Array.from({ length: n }, (_, i) => [i + 1, { deliveryIds: [] }]));
@@ -16,23 +16,32 @@ const START: InningsState = {
   nonStrikerId: 2,
 };
 
-const after = (...inputs: DeliveryInput[]) => inputs.reduce(applyInput, START);
+// Records the balls in order, a minute apart from time 0.
+const play = (state: InningsState, ...balls: TypedBall[]) =>
+  balls.reduce((s, ball, i) => applyInput(s, { ...ball, time: i * 60_000 }), state);
+
+const after = (...inputs: TypedBall[]) => play(START, ...inputs);
 // [on strike, off strike]
 const ends = (s: InningsState) => [s.strikerId, s.nonStrikerId];
-const bowled = (batterOutId: number): DeliveryInput => ({ wicket: { batterOutId, howOut: "bowled" } });
+const bowled = (batterOutId: number): TypedBall => ({ wicket: { batterOutId, howOut: "bowled" } });
 
-describe("input2Event", () => {
-  it("fills in the over, the bowler and any extras left out", () =>
-    expect(input2Event({ batRuns: 2 }, { ...START, overNumber: 3, currentBowlerId: 2 })).toEqual({
-      type: "deliveryBowled",
-      delivery: {
-        overNumber: 3,
-        bowlerId: 2,
-        batRuns: 2,
-        extras: { wides: 0, noBalls: 0, byes: 0, legByes: 0 },
-        wicket: undefined,
+describe("input2Events", () => {
+  it("brings in the openers, then fills in the over, the bowler and any extras left out", () =>
+    expect(input2Events({ batRuns: 2, time: 1000 }, { ...START, overNumber: 3, currentBowlerId: 2 })).toEqual([
+      { type: "batterCameIn", batterId: 1, time: 1000 },
+      { type: "batterCameIn", batterId: 2, time: 1000 },
+      {
+        type: "deliveryBowled",
+        delivery: {
+          overNumber: 3,
+          bowlerId: 2,
+          batRuns: 2,
+          extras: { wides: 0, noBalls: 0, byes: 0, legByes: 0 },
+          wicket: undefined,
+          time: 1000,
+        },
       },
-    }));
+    ]));
 });
 
 describe("applyInput", () => {
@@ -45,12 +54,12 @@ describe("applyInput", () => {
   });
   it("leaves the state it was given unchanged", () => {
     const before = structuredClone(START);
-    applyInput(START, { batRuns: 1 });
+    applyInput(START, { batRuns: 1, time: 0 });
     expect(START).toEqual(before);
   });
 
   describe("strike", () => {
-    it.each<[string, DeliveryInput, (number | null)[]]>([
+    it.each<[string, TypedBall, (number | null)[]]>([
       ["a dot ball keeps strike", {}, [1, 2]],
       ["1 run swaps ends", { batRuns: 1 }, [2, 1]],
       ["2 runs keeps strike", { batRuns: 2 }, [1, 2]],
@@ -78,10 +87,10 @@ describe("applyInput", () => {
       expect(ends(after(bowled(1), bowled(3)))).toEqual([4, 2]));
     it("nobody comes in after the 10th wicket", () => {
       const lastPair = { ...START, strikerId: 10, nonStrikerId: 11 };
-      expect(ends(applyInput(lastPair, bowled(10)))).toEqual([null, 11]);
+      expect(ends(play(lastPair, bowled(10)))).toEqual([null, 11]);
     });
     it("no more balls can be bowled once the innings is over", () =>
-      expect(() => applyInput({ ...START, strikerId: null }, {})).toThrow("innings is over"));
+      expect(() => play({ ...START, strikerId: null }, {})).toThrow("innings is over"));
   });
 });
 
@@ -92,7 +101,7 @@ describe("apply", () => {
     expect(ends(state)).toEqual([2, 1]);
   });
   it("balls after endOver go to the new over and bowler", () => {
-    const state = applyInput(apply(START, { type: "endOver", nextBowlerId: 2 }), {});
+    const state = play(apply(START, { type: "endOver", nextBowlerId: 2 }), {});
     expect(state.deliveries[0]).toMatchObject({ overNumber: 2, bowlerId: 2 });
     expect(state.bowlers[2].deliveryIds).toEqual([0]);
   });

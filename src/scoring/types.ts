@@ -21,14 +21,19 @@ export interface Delivery {
   batRuns: number;
   extras: Extras;
   wicket?: Wicket;
-  // time: number
+  time: number; // when the scorer entered the ball, in ms since 1970 (Date.now())
 }
 
-// What the scorer entered: anything left out is 0. input2Event fills in the rest.
-export interface DeliveryInput {
+// A ball as the scorer typed it: anything left out is 0. input2Events fills in the rest.
+export interface TypedBall {
   batRuns?: number;
   extras?: Partial<Extras>;
   wicket?: Wicket;
+}
+
+// A typed ball with the time the scorer entered it, ready to record.
+export interface DeliveryInput extends TypedBall {
+  time: number;
 }
 
 // export interface DeliveryContext {
@@ -40,13 +45,8 @@ export interface DeliveryInput {
 export type MatchEvent =
   | { type: "deliveryBowled"; delivery: Delivery }
   | { type: "endOver"; nextBowlerId: number }
-  | { type: "penaltyRunsAwarded"; runs: number };
-// | {
-//     type: "batterCameIn";
-//     batterId: number;
-//     end: "striker" | "nonStriker";
-//     time: string;
-//   }
+  | { type: "penaltyRunsAwarded"; runs: number }
+  | { type: "batterCameIn"; batterId: number; time: number };
 // | { type: "bowlerChanged"; bowlerId: number }
 // | {
 //     type: "batterRetired";
@@ -59,7 +59,8 @@ export type Events = MatchEvent[];
 
 export interface InningsState {
   deliveries: Delivery[];
-  batters: Record<number, { deliveryIds: number[] }>;
+  // timeIn: when they came in (see batterCameIn), or undefined if they haven't yet.
+  batters: Record<number, { deliveryIds: number[]; timeIn?: number }>;
   bowlers: Record<number, { deliveryIds: number[] }>;
   overNumber: number;
   currentBowlerId: number;

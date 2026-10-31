@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { possibleDismissals, validateDeliveryInput } from "./validate";
-import type { DeliveryInput } from "./types";
+import type { TypedBall } from "./types";
 import type { HowOut } from "./dismissals";
 
-const isValid = (input: DeliveryInput) => validateDeliveryInput(input).valid;
+const isValid = (input: TypedBall) => validateDeliveryInput(input).valid;
 const out = (howOut: HowOut) => ({ batterOutId: 1, howOut });
 
 const BOWLED: HowOut = "bowled";
@@ -82,7 +82,7 @@ describe("validateDeliveryInput", () => {
       ["byes when bowled", { extras: { byes: 1 }, wicket: out(BOWLED) }],
       ["leg byes when hit the ball twice", { extras: { legByes: 1 }, wicket: out(HIT_TWICE) }],
       ["wides run when stumped", { extras: { wides: 2 }, wicket: out(STUMPED) }],
-    ])("%s", (_, input: DeliveryInput) => expect(isValid(input)).toBe(false));
+    ])("%s", (_, input: TypedBall) => expect(isValid(input)).toBe(false));
     it.each([
       ["byes", { byes: 1 }],
       ["leg byes", { legByes: 1 }],
@@ -98,7 +98,7 @@ describe("validateDeliveryInput", () => {
 });
 
 describe("possibleDismissals", () => {
-  it.each<[string, DeliveryInput, HowOut[]]>([
+  it.each<[string, TypedBall, HowOut[]]>([
     ["a legal ball", {}, ["bowled", "caught", "lbw", "stumped", "hitWicket", "runOut", "obstructingTheField", "hitTheBallTwice"]],
     ["runs off the bat", { batRuns: 2 }, ["runOut", "obstructingTheField"]],
     ["a wide", { extras: { wides: 1 } }, ["stumped", "hitWicket", "runOut", "obstructingTheField"]],

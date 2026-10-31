@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
-import type { DeliveryInput } from "@/scoring";
+import type { TypedBall } from "@/scoring";
 import { parseText } from "./parseText";
 
-const parsesTo = (text: string, input: DeliveryInput) =>
+const parsesTo = (text: string, input: TypedBall) =>
   expect(parseText(text)).toEqual({ ok: true, input, needsHowOut: false });
 const fails = (text: string) => expect(parseText(text).ok).toBe(false);
 
@@ -18,7 +18,7 @@ describe("parseText", () => {
   });
 
   describe("wickets", () => {
-    const wicketOn = (text: string, input: DeliveryInput) =>
+    const wicketOn = (text: string, input: TypedBall) =>
       expect(parseText(text)).toEqual({ ok: true, input, needsHowOut: true });
     it.each(["w", "W"])("%s is a wicket on a dot ball", (t) => wicketOn(t, { batRuns: 0 }));
     it("2w is a wicket after 2 runs", () => wicketOn("2w", { batRuns: 2 }));

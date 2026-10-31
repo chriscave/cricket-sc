@@ -1,5 +1,4 @@
 import "./ScoreSummary.css";
-import type { ReactNode } from "react";
 import type { ScoreSummaryData } from "./selectors";
 
 // Left block: one row each, with a ruled area beside it for tally marks and a box at
@@ -19,23 +18,16 @@ const TOTALS: { key: keyof ScoreSummaryData["totals"]; label: string; bold?: boo
   { key: "gTotal", label: "G. total", bold: true },
 ];
 
-// Bottom line of the book: "For __ wickets in __ overs in __ minutes __"
-const FOOTER = [
-  { key: "for",       label: "For" },
-  { key: "wicketsIn", label: "Wickets in" },
-  { key: "oversIn",   label: "Overs in" },
-  { key: "minutes",   label: "Minutes" },
+// Bottom line of the book: "FOR __ WICKETS IN __ OVERS IN __ MINUTES". Each blank is
+// filled in from footer, followed by the words after it.
+const FOOTER: { key: keyof ScoreSummaryData["footer"]; label: string }[] = [
+  { key: "wickets", label: "Wickets in" },
+  { key: "overs",   label: "Overs in" },
+  { key: "minutes", label: "Minutes" },
 ];
 
-/*
-  tally, extras, totals: from selectScoreSummary.
-  footer: { wicketsIn, oversIn, minutes }   // "For" is a label only
-*/
-type ScoreSummaryProps = ScoreSummaryData & {
-  footer?: Partial<Record<string, ReactNode>>;
-};
-
-export default function ScoreSummary({ tally, extras, totals, footer = {} }: ScoreSummaryProps) {
+// tally, extras, totals, footer: from selectScoreSummary.
+export default function ScoreSummary({ tally, extras, totals, footer }: ScoreSummaryData) {
   return (
     <div className="score-summary">
       <div className="ss-grid">
@@ -62,10 +54,11 @@ export default function ScoreSummary({ tally, extras, totals, footer = {} }: Sco
       </div>
 
       <div className="ss-footer">
+        <div className="ss-for">For</div>
         {FOOTER.map((f) => (
           <div key={f.key} className="ss-pair">
-            <span className="ss-pair-label">{f.label}</span>
             <span className="ss-pair-value">{footer[f.key]}</span>
+            <span className="ss-pair-label">{f.label}</span>
           </div>
         ))}
       </div>

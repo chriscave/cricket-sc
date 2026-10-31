@@ -1,4 +1,4 @@
-import type { InningsState } from "@/scoring";
+import { runsScored, type InningsState } from "@/scoring";
 
 // strokes: each scoring ball, as the first and last number it crosses off. A 4 at 10 is [11, 14].
 // dots: balls that didn't move the score (wickets included), counted on the next number to
@@ -13,8 +13,7 @@ export function selectRunTracker(state: InningsState): RunTrackerData {
   const dots: Record<number, number> = {};
   let score = 0;
   for (const d of state.deliveries) {
-    const { wides, noBalls, byes, legByes } = d.extras;
-    const runs = d.batRuns + wides + noBalls + byes + legByes;
+    const runs = runsScored(d);
     if (runs === 0) {
       dots[score + 1] = (dots[score + 1] ?? 0) + 1;
     } else {

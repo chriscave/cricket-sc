@@ -47,11 +47,14 @@
 /* Batsman rows: zebra striping without extra markup */
 .sc-body:nth-of-type(even) { background: var(--stripe); }
 .sc-body { border-bottom: 1px solid var(--hair); }
-.sc-body .sc-num { justify-content: center; color: #8a94b0; }
+.sc-body .sc-num { justify-content: center; color: #8a94b0; position: relative; }
+/* In the number box's top right corner, darker than the number so it stands out. */
+.sc-strike { position: absolute; top: 2px; right: 3px; color: #444; }
 /* Text written on the row's bottom line, like a figure in a ruled book. */
 .sc-body .sc-bottom { align-items: flex-end; }
 .sc-body .sc-total { justify-content: flex-end; align-items: flex-end; padding-right: 8px; }
 .sc-score { font-size: 15px; }
+.sc-time { font-size: 10px; } /* small enough for 14:05 to fit the In and Out columns */
 
 /* Stacked cells: two halves separated by a hairline (used in body and header) */
 .sc-stack {

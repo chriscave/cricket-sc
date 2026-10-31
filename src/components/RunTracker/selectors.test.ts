@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { applyInput, type DeliveryInput, type InningsState } from "@/scoring";
+import { applyInput, type TypedBall, type InningsState } from "@/scoring";
 import { selectRunTracker } from "./selectors";
 
 // Bowler 1 bowling to batters 1 and 2.
@@ -13,10 +13,14 @@ const START: InningsState = {
   nonStrikerId: 2,
 };
 
-const DOT: DeliveryInput = {};
-const BOWLED: DeliveryInput = { wicket: { batterOutId: 1, howOut: "bowled" } };
-const runs = (batRuns: number): DeliveryInput => ({ batRuns });
-const tracker = (inputs: DeliveryInput[]) => selectRunTracker(inputs.reduce(applyInput, START));
+// Records the balls in order, a minute apart from time 0.
+const play = (state: InningsState, ...balls: TypedBall[]) =>
+  balls.reduce((s, ball, i) => applyInput(s, { ...ball, time: i * 60_000 }), state);
+
+const DOT: TypedBall = {};
+const BOWLED: TypedBall = { wicket: { batterOutId: 1, howOut: "bowled" } };
+const runs = (batRuns: number): TypedBall => ({ batRuns });
+const tracker = (inputs: TypedBall[]) => selectRunTracker(play(START, ...inputs));
 
 describe("selectRunTracker", () => {
   it("crosses off each scoring ball as one stroke", () => {

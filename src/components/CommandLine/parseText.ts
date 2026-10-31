@@ -1,8 +1,8 @@
-import type { DeliveryInput } from "@/scoring";
+import type { TypedBall } from "@/scoring";
 
 export type ParseResult =
   // needsHowOut: a wicket fell, and how the batter was out still has to be chosen.
-  | { ok: true; input: DeliveryInput; needsHowOut: boolean }
+  | { ok: true; input: TypedBall; needsHowOut: boolean }
   | { ok: false; error: string };
 
 // non-negative numbers positive numbers
@@ -18,7 +18,7 @@ const BYES = /^(\d*)(b|lb)$/; //           "2b", "lb"
 const WIDE = /^(?:wd|\+)(\d+|\.*)$/; //    "wd", "+2", "wd.."
 const NO_BALL = /^(?:nb|o|O)(\d+|\.*)$/; // "nb", "o4", "nb...."
 
-const ok = (input: DeliveryInput): ParseResult => ({ ok: true, input, needsHowOut: false });
+const ok = (input: TypedBall): ParseResult => ({ ok: true, input, needsHowOut: false });
 const fail = (error: string): ParseResult => ({ ok: false, error });
 
 // Runs taken after a wide: none (""), a number ("2"), or one dot per run ("..").

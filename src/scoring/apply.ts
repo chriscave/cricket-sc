@@ -6,18 +6,28 @@ import {
   type MatchEvent,
 } from "./types";
 
-export function input2Event(
+// The events a ball makes. A batter at the crease who hasn't come in yet comes in first,
+// at the ball's time: both openers on the first ball, and a new batter on the first ball
+// after the wicket that brought them in.
+export function input2Events(
   input: DeliveryInput,
   state: InningsState,
-): MatchEvent {
+): MatchEvent[] {
+  const comingIn = [state.strikerId, state.nonStrikerId].filter(
+    (id): id is number => id !== null && state.batters[id].timeIn === undefined,
+  );
   const delivery: Delivery = {
     overNumber: state.overNumber,
     bowlerId: state.currentBowlerId,
     batRuns: input.batRuns ?? 0,
     extras: { ...NO_EXTRAS, ...input.extras },
     wicket: input.wicket, // undefined if the input had no wicket
+    time: input.time,
   };
-  return { type: "deliveryBowled", delivery };
+  return [
+    ...comingIn.map((batterId): MatchEvent => ({ type: "batterCameIn", batterId, time: input.time })),
+    { type: "deliveryBowled", delivery },
+  ];
 }
 
 // Records a ball. It never ends the over: that happens when the scorer chooses the
@@ -26,7 +36,7 @@ export function applyInput(
   state: InningsState,
   input: DeliveryInput,
 ): InningsState {
-  return apply(state, input2Event(input, state));
+  return input2Events(input, state).reduce(apply, state);
 }
 
 export function apply(
@@ -58,6 +68,7 @@ export function apply(
     nextState.batters = {
       ...state.batters,
       [strikerId]: {
+        ...state.batters[strikerId], // keeps timeIn
         deliveryIds: [...state.batters[strikerId].deliveryIds, deliveryId],
       },
     };
@@ -99,6 +110,13 @@ export function apply(
     const nonStrikerId = state.strikerId;
     nextState.strikerId = strikerId;
     nextState.nonStrikerId = nonStrikerId;
+  }
+  if (matchEvent.type === "batterCameIn") {
+    const { batterId, time } = matchEvent;
+    nextState.batters = {
+      ...state.batters,
+      [batterId]: { ...state.batters[batterId], timeIn: time },
+    };
   }
   if (matchEvent.type === "penaltyRunsAwarded") {
     nextState.penalties = [...(state.penalties ?? []), matchEvent.runs];

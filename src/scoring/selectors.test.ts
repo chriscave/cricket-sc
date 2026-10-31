@@ -8,6 +8,7 @@ const ball = (wicket: boolean): Delivery => ({
   batRuns: 0,
   extras: NO_EXTRAS,
   wicket: wicket ? { batterOutId: 1, howOut: "bowled" } : undefined,
+  time: 0,
 });
 
 // An innings of the given balls, with true for each one that took a wicket.

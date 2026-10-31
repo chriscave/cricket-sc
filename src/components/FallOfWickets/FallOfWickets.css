@@ -8,8 +8,8 @@
   /* One template for the whole card. Every row inherits it via subgrid. */
   display: grid;
   grid-template-columns: 150px repeat(10, minmax(48px, 1fr));
-  /* fixed header, then 5 rows that share whatever height the card is given */
-  grid-template-rows: 24px repeat(5, minmax(var(--row-h), 1fr));
+  /* fixed header, then 4 rows that share whatever height the card is given */
+  grid-template-rows: 24px repeat(4, minmax(var(--row-h), 1fr));
   background: var(--paper);
   border: 1px solid var(--line);
   font: 11px/1.2 system-ui, sans-serif;
@@ -43,3 +43,7 @@
 /* The header is child 1, so odd children are the 2nd, 4th... body rows */
 .fw-body:nth-child(odd) { background: var(--stripe); }
 .fw-label { font-size: 10px; }
+/* Each wicket's figures, written on the row's bottom line. */
+.fw-value { align-items: flex-end; padding-bottom: 2px; font-size: 14px; }
+.fw-body .fw-label { align-items: flex-end; padding-bottom: 3px; } /* smaller text: lift it level with the figures */
+.fw-balls { font-size: 10px; } /* the partnership's balls, small beside its runs */

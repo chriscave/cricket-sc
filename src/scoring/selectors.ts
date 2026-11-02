@@ -8,6 +8,10 @@ export const isLegal = (d: Delivery) =>
 // since the batter can hit it; a wide is out of their reach.
 export const isBallFaced = (d: Delivery) => d.extras.wides === 0;
 
+// Minutes between two times as read off a clock: 14:00 to 14:35 is 35, whatever the seconds.
+export const clockMinutes = (from: number, to: number) =>
+  Math.floor(to / 60_000) - Math.floor(from / 60_000);
+
 // All the runs from a ball: off the bat and every kind of extra.
 export const runsScored = (d: Delivery) =>
   d.batRuns + d.extras.wides + d.extras.noBalls + d.extras.byes + d.extras.legByes;

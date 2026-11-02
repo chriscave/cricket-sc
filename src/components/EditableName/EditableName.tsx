@@ -10,10 +10,18 @@ export default function EditableName({ name, shown, onRename }: EditableNameProp
   const [draft, setDraft] = useState<string | null>(null);
   // Enter and Escape both leave by blurring, so saving happens in one place.
   const cancelled = useRef(false);
+  // What had the focus before the click, e.g. the command line. Enter and Escape give it
+  // back, so the scorer can carry on typing balls. Clicking away leaves the focus there.
+  const returnFocusTo = useRef<HTMLElement | null>(null);
 
   if (draft === null) {
     return (
-      <button type="button" className="en-shown" onClick={() => setDraft(name)}>
+      <button
+        type="button"
+        className="en-shown"
+        onMouseDown={() => (returnFocusTo.current = document.activeElement as HTMLElement | null)}
+        onClick={() => setDraft(name)}
+      >
         {shown}
       </button>
     );
@@ -27,7 +35,10 @@ export default function EditableName({ name, shown, onRename }: EditableNameProp
       onChange={(e) => setDraft(e.target.value)}
       onKeyDown={(e) => {
         if (e.key === "Escape") cancelled.current = true;
-        if (e.key === "Enter" || e.key === "Escape") e.currentTarget.blur();
+        if (e.key === "Enter" || e.key === "Escape") {
+          e.currentTarget.blur();
+          returnFocusTo.current?.focus();
+        }
       }}
       onBlur={() => {
         if (!cancelled.current) onRename(draft.trim());

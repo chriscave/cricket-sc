@@ -1,4 +1,5 @@
 import "./ScoreSummary.css";
+import { bowlerColour } from "@/components/DeliveryMarks";
 import type { ScoreSummaryData } from "./selectors";
 
 // Left block: one row each, with a ruled area beside it for tally marks and a box at
@@ -35,7 +36,9 @@ export default function ScoreSummary({ tally, extras, totals, footer }: ScoreSum
           <div key={e.key} className="ss-line" style={{ gridRow: `${i * 3 + 1} / span 3` }}>
             <div className="ss-cell ss-label">{e.label}</div>
             <div className="ss-cell ss-tally">
-              {tally[e.key].map((runs, j) => <span key={j}>{runs}</span>)}
+              {tally[e.key].map((m, j) => (
+                <span key={j} style={{ color: m.bowlerId === undefined ? undefined : bowlerColour(m.bowlerId) }}>{m.runs}</span>
+              ))}
             </div>
             <div className="ss-cell ss-score">{extras[e.key]}</div>
           </div>

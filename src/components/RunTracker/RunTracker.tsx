@@ -1,18 +1,25 @@
 import "./RunTracker.css";
-import { DotMark } from "@/components/DeliveryMarks";
+import type { CSSProperties } from "react";
+import { bowlerColour, DotMark } from "@/components/DeliveryMarks";
 import type { RunTrackerData } from "./selectors";
 
 // 10 rows of 40 numbers.
 const TOTAL = 400;
 const COLUMNS = 40;
 
+// A stroke's line and brackets in its bowler's colour, slightly see-through so the number
+// still shows through.
+const strikeColour = (colour: string) => `color-mix(in srgb, ${colour} 85%, transparent)`;
+
 // The dots on a score: stacked in columns of 3, like the batting analysis, up to 3
 // columns, or a small count in the corner when there are more than fit.
-function Dots({ count }: { count: number }) {
-  if (count > 9) return <span className="rt-dot-count">{count}</span>;
+function Dots({ bowlers }: { bowlers: number[] }) {
+  if (bowlers.length > 9) return <span className="rt-dot-count">{bowlers.length}</span>;
   return (
     <span className="rt-dots">
-      {Array.from({ length: count }, (_, i) => <DotMark key={i} />)}
+      {bowlers.map((id, i) => (
+        <span key={i} style={{ color: bowlerColour(id) }}><DotMark /></span>
+      ))}
     </span>
   );
 }
@@ -24,9 +31,13 @@ function Dots({ count }: { count: number }) {
 export default function RunTracker({ strokes, dots }: RunTrackerData) {
   const numbers = Array.from({ length: TOTAL }, (_, i) => i + 1);
   const rows = Math.ceil(TOTAL / COLUMNS);
-  const scored = strokes.at(-1)?.[1] ?? 0;
-  const opens = new Set(strokes.map(([first]) => first));
-  const closes = new Set(strokes.map(([, last]) => last));
+  const scored = strokes.at(-1)?.last ?? 0;
+  const opens = new Set(strokes.map((s) => s.first));
+  const closes = new Set(strokes.map((s) => s.last));
+  // The colour of the stroke that crosses off each number.
+  const strikeOf: Record<number, string> = {};
+  for (const s of strokes)
+    for (let n = s.first; n <= s.last; n++) strikeOf[n] = strikeColour(bowlerColour(s.bowlerId));
 
   return (
     <div className="run-tracker" style={{ "--cols": COLUMNS, "--rows": rows }}>
@@ -38,9 +49,13 @@ export default function RunTracker({ strokes, dots }: RunTrackerData) {
           closes.has(n) && "rt-close",
         ].filter(Boolean).join(" ");
         return (
-          <span key={n} className={className}>
+          <span
+            key={n}
+            className={className}
+            style={n in strikeOf ? ({ "--strike": strikeOf[n] } as CSSProperties) : undefined}
+          >
             {n}
-            {n in dots && <Dots count={dots[n]} />}
+            {n in dots && <Dots bowlers={dots[n]} />}
           </span>
         );
       })}

@@ -1,5 +1,6 @@
 import "./ScoringRate.css";
 import type { ReactNode } from "react";
+import { bowlerColour } from "@/components/DeliveryMarks";
 import type { OverRate } from "./selectors";
 
 // One entry per column after the over number, and what it shows for an over. `prev` is
@@ -33,7 +34,9 @@ export default function ScoringRate({ rates = [], overs = 60 }: { rates?: OverRa
         <div key={i} className="sr-row">
           <div className="sr-cell">{i + 1}</div>
           {COLUMNS.map((c) => (
-            <div key={c.label} className="sr-cell">{row && c.cell(row, rates[i - 1])}</div>
+            <div key={c.label} className="sr-cell" style={{ color: row && bowlerColour(row.bowlerId) }}>
+              {row && c.cell(row, rates[i - 1])}
+            </div>
           ))}
         </div>
       ))}

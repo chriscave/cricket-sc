@@ -2,6 +2,7 @@ import { creditedToBowler, isLegal, type Delivery, type Extras } from "@/scoring
 
 // What the analyses need to draw a ball.
 export type DeliveryMark = {
+  bowlerId: number;
   isLegal: boolean;
   batRuns: number;
   extras: Extras;
@@ -10,6 +11,7 @@ export type DeliveryMark = {
 
 export function toDeliveryMark(d: Delivery): DeliveryMark {
   return {
+    bowlerId: d.bowlerId,
     isLegal: isLegal(d),
     batRuns: d.batRuns,
     extras: d.extras,

@@ -1,6 +1,6 @@
 import type { BowlerRow, Over } from "./selectors";
 import "./BowlingAnalysis.css";
-import { renderMark } from "@/components/DeliveryMarks";
+import { bowlerColour, renderMark } from "@/components/DeliveryMarks";
 import MaidenMark from "./MaidenMark";
 import EditableName from "@/components/EditableName";
 import { bowlerName, type Names, type Rename } from "@/scoring";
@@ -131,7 +131,7 @@ export default function BowlingAnalysis({
         return (
           <div key={i} className="ba-row ba-body">
             <div className="ba-cell ba-num">{id}</div>
-            <div className="ba-cell">
+            <div className="ba-cell" style={{ color: bowlerColour(id) }}>
               {/* Can be named before they bowl. The default shows once they have. */}
               <EditableName
                 name={names.bowlers[id] ?? ""}
@@ -152,6 +152,7 @@ export default function BowlingAnalysis({
                   style={{
                     gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
                     fontSize: ballFontSize(columns),
+                    color: bowlerColour(id),
                   }}
                 >
                   {over?.maiden && <MaidenMark marks={marks} />}

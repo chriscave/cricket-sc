@@ -24,15 +24,22 @@ const tracker = (inputs: TypedBall[]) => selectRunTracker(play(START, ...inputs)
 
 describe("selectRunTracker", () => {
   it("crosses off each scoring ball as one stroke", () => {
-    expect(tracker([runs(4), runs(1), runs(2)]).strokes).toEqual([[1, 4], [5, 5], [6, 7]]);
+    expect(tracker([runs(4), runs(1), runs(2)]).strokes).toEqual([
+      { first: 1, last: 4, bowlerId: 1 },
+      { first: 5, last: 5, bowlerId: 1 },
+      { first: 6, last: 7, bowlerId: 1 },
+    ]);
   });
   it("counts extras the same as runs off the bat", () => {
-    expect(tracker([{ extras: { wides: 1 } }, { extras: { byes: 2 } }]).strokes).toEqual([[1, 1], [2, 3]]);
+    expect(tracker([{ extras: { wides: 1 } }, { extras: { byes: 2 } }]).strokes).toEqual([
+      { first: 1, last: 1, bowlerId: 1 },
+      { first: 2, last: 3, bowlerId: 1 },
+    ]);
   });
   it("puts dots on the next number to be crossed off", () => {
-    expect(tracker([DOT, DOT, runs(2), DOT]).dots).toEqual({ 1: 2, 3: 1 });
+    expect(tracker([DOT, DOT, runs(2), DOT]).dots).toEqual({ 1: [1, 1], 3: [1] });
   });
   it("counts a wicket with no runs as a dot", () => {
-    expect(tracker([BOWLED]).dots).toEqual({ 1: 1 });
+    expect(tracker([BOWLED]).dots).toEqual({ 1: [1] });
   });
 });

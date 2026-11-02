@@ -1,6 +1,6 @@
 import "./BattingAnalysis.css";
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { renderMark } from "@/components/DeliveryMarks";
+import { bowlerColour, renderMark } from "@/components/DeliveryMarks";
 import Clock from "@/components/Clock";
 import EditableName from "@/components/EditableName";
 import { batterName, bowlerName, DISMISSALS, type Names, type Rename } from "@/scoring";
@@ -78,7 +78,11 @@ function RunsCell({ columns, out }: { columns: BattingColumn[]; out: boolean }) 
       {columns.map((col, i) => (
         <div key={i} className={col.every(isDot) ? "sc-runs-col sc-dots" : "sc-runs-col sc-halves"}>
           {col.map((mark, j) => (
-            <span key={j} className={isDot(mark) ? "sc-ball sc-dot" : "sc-ball"}>
+            <span
+              key={j}
+              className={isDot(mark) ? "sc-ball sc-dot" : "sc-ball"}
+              style={{ color: bowlerColour(mark.bowlerId) }}
+            >
               {renderMark(mark)}
             </span>
           ))}
@@ -139,7 +143,12 @@ export default function BattingAnalysis({
           <div className="sc-cell sc-bottom">
             {row.howOut ? DISMISSALS[row.howOut].label : row.hasBatted && "Not Out"}
           </div>
-          <div className="sc-cell sc-bottom">{row.bowlerId && bowlerName(names, row.bowlerId)}</div>
+          <div
+            className="sc-cell sc-bottom"
+            style={{ color: row.bowlerId === undefined ? undefined : bowlerColour(row.bowlerId) }}
+          >
+            {row.bowlerId && bowlerName(names, row.bowlerId)}
+          </div>
           <div className="sc-cell sc-total">
             {row.hasBatted && (
               <span>

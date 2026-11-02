@@ -78,7 +78,7 @@
 .ss-score,
 .ss-total .ss-cell { align-items: flex-end; padding-bottom: 2px; }
 .ss-total .ss-total-label { padding-bottom: 3px; } /* smaller text: lift it level with the totals */
-.ss-bold .ss-total-value { font-size: 17px; } /* the grand total, as large as the footer */
+.ss-bold .ss-total-value { font-size: 20px; } /* the grand total, the largest figure in the summary */
 
 /* Totals: heavier line on their left edge, as in the book */
 .ss-total-label { border-left: 2px solid var(--line); }

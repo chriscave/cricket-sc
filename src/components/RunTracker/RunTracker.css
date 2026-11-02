@@ -1,7 +1,7 @@
 .run-tracker {
   --line: #7d8a86;
   --paper: #f4f4fb;
-  --strike: rgb(85 85 85 / 0.5); /* half see-through, so the numbers show through the line and brackets */
+  --strike: rgb(85 85 85 / 0.85); /* slightly see-through, so the numbers show through the line and brackets */
   --row-h: 20px;
 
   /* The number of columns comes from the `columns` prop. Numbers wrap into rows on their own. */
@@ -28,12 +28,12 @@
 
 /* Scored runs: crossed off as (---), one bracketed stroke per scoring ball */
 .rt-done {
-  background: linear-gradient(var(--strike), var(--strike)) center / 100% 1px no-repeat;
+  background: linear-gradient(var(--strike), var(--strike)) center / 100% 1.5px no-repeat;
 }
 /* The line stops short of the brackets */
-.rt-open { background-size: calc(100% - 4px) 1px; background-position: right; }
-.rt-close { background-size: calc(100% - 4px) 1px; background-position: left; }
-.rt-open.rt-close { background-size: calc(100% - 8px) 1px; background-position: center; }
+.rt-open { background-size: calc(100% - 4px) 1.5px; background-position: right; }
+.rt-close { background-size: calc(100% - 4px) 1.5px; background-position: left; }
+.rt-open.rt-close { background-size: calc(100% - 8px) 1.5px; background-position: center; }
 
 .rt-open::before,
 .rt-close::after {
@@ -57,8 +57,7 @@
   grid-template-rows: repeat(3, 5px);
   grid-auto-flow: column;
   grid-auto-columns: 4px;
-  color: #444;
-  opacity: 0.5;
+  opacity: 0.8;
 }
 /* DotMark's dot scales with its box: draw it at 12px and pull the edges in, leaving each
    dot a slot 4px wide and 5px tall, so 3 stack in the row. */

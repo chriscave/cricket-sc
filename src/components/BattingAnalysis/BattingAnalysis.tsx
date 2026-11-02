@@ -2,7 +2,8 @@ import "./BattingAnalysis.css";
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { renderMark } from "@/components/DeliveryMarks";
 import Clock from "@/components/Clock";
-import { DISMISSALS } from "@/scoring";
+import EditableName from "@/components/EditableName";
+import { batterName, bowlerName, DISMISSALS, type Names, type Rename } from "@/scoring";
 import { isDot, type BatterRow, type BattingColumn } from "./selectors";
 
 // Header cells, one per column, except grouped ones that span several.
@@ -92,9 +93,13 @@ function RunsCell({ columns, out }: { columns: BattingColumn[]; out: boolean }) 
 export default function BattingAnalysis({
   innings = [],
   batters = 11,
+  names,
+  onRename,
 }: {
   innings?: BatterRow[];
   batters?: number;
+  names: Names;
+  onRename: Rename;
 }) {
   const rows: Partial<BatterRow>[] = Array.from(
     { length: batters },
@@ -108,13 +113,22 @@ export default function BattingAnalysis({
       </div>
 
       {/* Cells in order. MUST match grid-template-columns in the CSS. */}
-      {rows.map((row, i) => (
+      {rows.map((row, i) => {
+        const id = i + 1;
+        return (
         <div key={i} className="sc-row sc-body">
           <div className="sc-cell sc-num">
-            {i + 1}
+            {id}
             {row.onStrike && <span className="sc-strike" aria-label="on strike">†</span>}
           </div>
-          <div className="sc-cell" />  {/* name */}
+          <div className="sc-cell">
+            {/* Can be named before they come in. The default shows once they have. */}
+            <EditableName
+              name={names.batters[id] ?? ""}
+              shown={row.hasBatted || names.batters[id] ? batterName(names, id) : ""}
+              onRename={(name) => onRename("batters", id, name)}
+            />
+          </div>
           <Stack top={<Clock at={row.timeIn} className="sc-time" />} bottom={row.overIn} />
           <Stack top={<Clock at={row.timeOut} className="sc-time" />} bottom={row.overOut} />
           <RunsCell columns={row.columns ?? []} out={row.howOut !== undefined} />
@@ -125,7 +139,7 @@ export default function BattingAnalysis({
           <div className="sc-cell sc-bottom">
             {row.howOut ? DISMISSALS[row.howOut].label : row.hasBatted && "Not Out"}
           </div>
-          <div className="sc-cell sc-bottom">{row.bowlerId && `Bowler ${row.bowlerId}`}</div>
+          <div className="sc-cell sc-bottom">{row.bowlerId && bowlerName(names, row.bowlerId)}</div>
           <div className="sc-cell sc-total">
             {row.hasBatted && (
               <span>
@@ -134,7 +148,8 @@ export default function BattingAnalysis({
             )}
           </div>
         </div>
-      ))}
+        );
+      })}
 
     </div>
   );

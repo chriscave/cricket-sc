@@ -1,5 +1,6 @@
 import { toDeliveryMark, type DeliveryMark } from "@/components/DeliveryMarks";
 import {
+  clockMinutes,
   creditedToBowler,
   isBallFaced,
   oversAt,
@@ -81,10 +82,6 @@ function reach(deliveries: Delivery[], target: number) {
   }
   return undefined;
 }
-
-// Minutes between two times as read off a clock: 14:00 to 14:35 is 35, whatever the seconds.
-const clockMinutes = (from: number, to: number) =>
-  Math.floor(to / 60_000) - Math.floor(from / 60_000);
 
 export function selectBattingAnalysis(state: InningsState): BatterRow[] {
   const atCrease = [state.strikerId, state.nonStrikerId];

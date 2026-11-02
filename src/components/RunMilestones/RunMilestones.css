@@ -39,3 +39,6 @@
 /* The header is child 1, so odd children are the 100, 200, 300 rows */
 .rm-body:nth-child(odd) { background: var(--stripe); }
 .rm-runs { color: #555; }
+/* Each milestone's figures, written on the row's bottom line, as in the fall of wickets. */
+.rm-value { align-items: flex-end; padding-bottom: 2px; font-size: 14px; }
+.rm-body .rm-runs { align-items: flex-end; padding-bottom: 3px; } /* smaller text: lift it level with the figures */

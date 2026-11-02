@@ -2,6 +2,8 @@ import type { BowlerRow, Over } from "./selectors";
 import "./BowlingAnalysis.css";
 import { renderMark } from "@/components/DeliveryMarks";
 import MaidenMark from "./MaidenMark";
+import EditableName from "@/components/EditableName";
+import { bowlerName, type Names, type Rename } from "@/scoring";
 
 const OVER_COUNT = 20;
 const OVERS = Array.from({ length: OVER_COUNT }, (_, i) => i);
@@ -100,9 +102,13 @@ function ballPosition(ball: number, ballCount: number, columns: number) {
 
 export type BowlingAnalysisProps = {
   bowlers: BowlerRow[];
+  names: Names;
+  onRename: Rename;
 };
 export default function BowlingAnalysis({
   bowlers = [],
+  names,
+  onRename,
 }: BowlingAnalysisProps) {
   const count = 8;
   const rows: Partial<BowlerRow>[] = Array.from(
@@ -120,11 +126,19 @@ export default function BowlingAnalysis({
 
       {rows.map((row, i) => {
         const hasBowled = !!row.oversAnalysis?.length;
+        const id = i + 1;
 
         return (
           <div key={i} className="ba-row ba-body">
-            <div className="ba-cell ba-num">{i + 1}</div>
-            <div className="ba-cell">{row.name}</div>
+            <div className="ba-cell ba-num">{id}</div>
+            <div className="ba-cell">
+              {/* Can be named before they bowl. The default shows once they have. */}
+              <EditableName
+                name={names.bowlers[id] ?? ""}
+                shown={row.hasComeOn || names.bowlers[id] ? bowlerName(names, id) : ""}
+                onRename={(name) => onRename("bowlers", id, name)}
+              />
+            </div>
             <div className="ba-cell">{row.action}</div>
 
             {OVERS.map((o) => {

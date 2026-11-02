@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { bowlerName, type Names } from "@/scoring";
 
 // The bowlers who could bowl the next over, shown under the command line at the end
 // of an over: everyone who has bowled except whoever bowled the last ball, plus a new
@@ -8,6 +9,7 @@ import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 // the focus when it appears, starting on the first bowler: ← and → choose, Enter
 // confirms.
 type NextBowlersProps = {
+  names: Names;
   usedBowlers: number[];
   bowlerOfPreviousDelivery: number | undefined;
   bowlerAtOtherEnd: number | undefined;
@@ -17,6 +19,7 @@ type NextBowlersProps = {
 const MAX_BOWLERS = 11;
 
 export default function NextBowlers({
+  names,
   usedBowlers,
   bowlerOfPreviousDelivery,
   bowlerAtOtherEnd,
@@ -25,7 +28,7 @@ export default function NextBowlers({
   const bowlers = usedBowlers
     .filter((id) => id !== bowlerOfPreviousDelivery)
     .sort((a, b) => Number(b === bowlerAtOtherEnd) - Number(a === bowlerAtOtherEnd))
-    .map((id) => ({ id, name: `Bowler ${id}` }));
+    .map((id) => ({ id, name: bowlerName(names, id) }));
 
   const newBowlerId = Math.max(0, ...usedBowlers) + 1;
   if (newBowlerId <= MAX_BOWLERS) {

@@ -6,12 +6,12 @@ import MatchHeader from "@/components/MatchHeader";
 import MatchOfficials from "@/components/MatchOfficials";
 import MatchResult from "@/components/MatchResult";
 import NotesRemarks from "@/components/NotesRemarks";
-import RunMilestones from "@/components/RunMilestones";
+import RunMilestones, { selectRunMilestones } from "@/components/RunMilestones";
 import RunTracker, { selectRunTracker } from "@/components/RunTracker";
 import BattingAnalysis, { selectBattingAnalysis } from "@/components/BattingAnalysis";
 import ScoreSummary, { selectScoreSummary } from "@/components/ScoreSummary";
-import ScoringRate from "@/components/ScoringRate";
-import type { InningsState } from "@/scoring";
+import ScoringRate, { selectScoringRate } from "@/components/ScoringRate";
+import type { InningsState, Names, Rename } from "@/scoring";
 import { selectBowlingsAnalysis } from "@/components/BowlingAnalysis";
 
 // The scorecard is laid out like a paper sheet at a fixed width, then zoomed to fill
@@ -36,16 +36,18 @@ function useFitToWidth(ref: RefObject<HTMLElement | null>): number {
 
 type ScorecardProps = {
   inningsState: InningsState;
+  names: Names;
+  onRename: Rename;
 };
 
-export default function Scorecard({ inningsState }: ScorecardProps) {
+export default function Scorecard({ inningsState, names, onRename }: ScorecardProps) {
   const sheet = useRef<HTMLDivElement>(null);
   const zoom = useFitToWidth(sheet);
   return (
     <div ref={sheet} className="container" style={{ width: SHEET_WIDTH, zoom }}>
       <div className="lhs">
         <MatchHeader />
-        <BattingAnalysis innings={selectBattingAnalysis(inningsState)} />
+        <BattingAnalysis innings={selectBattingAnalysis(inningsState)} names={names} onRename={onRename} />
         <div className="fow-and-score">
           <FallOfWickets wickets={selectFallOfWickets(inningsState)} />
           <ScoreSummary {...selectScoreSummary(inningsState)} />
@@ -54,16 +56,16 @@ export default function Scorecard({ inningsState }: ScorecardProps) {
           <div className="grow">
             <RunTracker {...selectRunTracker(inningsState)} />
           </div>
-          <RunMilestones />
+          <RunMilestones reached={selectRunMilestones(inningsState)} />
           <MatchOfficials />
         </div>
-        <BowlingAnalysis bowlers={selectBowlingsAnalysis(inningsState)} />
+        <BowlingAnalysis bowlers={selectBowlingsAnalysis(inningsState)} names={names} onRename={onRename} />
         <div className="result-row">
           <MatchResult />
           <NotesRemarks />
         </div>
       </div>
-      <ScoringRate />
+      <ScoringRate rates={selectScoringRate(inningsState)} />
     </div>
   );
 }

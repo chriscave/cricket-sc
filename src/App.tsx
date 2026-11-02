@@ -9,17 +9,22 @@ import {
   applyInput,
   batsmanOffStrike,
   batsmanOnStrike,
+  batterName,
   bowlersUsed,
   currentOverDeliveries,
   DISMISSALS,
   hasSixLegalDeliveries,
   isInningsOver,
+  NO_NAMES,
   otherEndBowlerId,
   possibleDismissals,
   previousDeliveryBowlerId,
+  withName,
   type DeliveryInput,
   type HowOut,
   type InningsState,
+  type Names,
+  type Rename,
   type TypedBall,
 } from "@/scoring";
 import DockPicker from "@/components/DockPicker";
@@ -81,6 +86,8 @@ const initialInnings: InningsState = {
 function App() {
   const [innings, setInnings] = useState<InningsState>(initialInnings);
   const [pendingWicket, setPendingWicket] = useState<PendingWicket | null>(null);
+  const [names, setNames] = useState<Names>(NO_NAMES);
+  const rename: Rename = (kind, id, name) => setNames((prev) => withName(prev, kind, id, name));
   const sixLegalDeliveries = hasSixLegalDeliveries(
     currentOverDeliveries(innings),
   );
@@ -119,7 +126,7 @@ function App() {
   return (
     <>
       <div className="app">
-        <Scorecard inningsState={innings} />
+        <Scorecard inningsState={innings} names={names} onRename={rename} />
       </div>
       <Dock>
         {pendingWicket?.awaiting === "howOut" ? (
@@ -140,8 +147,8 @@ function App() {
             key="batterOut"
             title="Which batter is out"
             options={[
-              { value: strikerId, label: `Batsman-${strikerId}` },
-              { value: nonStrikerId, label: `Batsman-${nonStrikerId}` },
+              { value: strikerId, label: batterName(names, strikerId) },
+              { value: nonStrikerId, label: batterName(names, nonStrikerId) },
             ]}
             onSelect={handleBatterOut}
             onCancel={() => setPendingWicket({ awaiting: "howOut", input: pendingWicket.input })}
@@ -152,6 +159,7 @@ function App() {
           </div>
         ) : sixLegalDeliveries ? (
           <NextBowlers
+            names={names}
             usedBowlers={usedBowlers}
             bowlerOfPreviousDelivery={bowlerOfPreviousDelivery}
             bowlerAtOtherEnd={bowlerAtOtherEnd}

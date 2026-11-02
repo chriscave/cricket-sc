@@ -10,6 +10,7 @@ const COLUMNS: { label: string; cell: (o: OverRate, prev?: OverRate) => ReactNod
   { label: "Wickets",            cell: (o, prev) => (o.wickets !== (prev?.wickets ?? 0) ? o.wickets : null) },
   { label: "Bowler no. in over", cell: (o) => o.bowlerId },
   { label: "Runs in over",       cell: (o) => o.runs },
+  { label: "Run rate",           cell: (o) => o.rate.toFixed(1) },
 ];
 
 // rates: from selectScoringRate, index 0 = over 1.

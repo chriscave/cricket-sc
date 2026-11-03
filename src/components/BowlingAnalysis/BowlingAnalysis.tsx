@@ -2,7 +2,7 @@ import type { BowlerRow, Over } from "./selectors";
 import "./BowlingAnalysis.css";
 import { bowlerColour, renderMark } from "@/components/DeliveryMarks";
 import MaidenMark from "./MaidenMark";
-import EditableName from "@/components/EditableName";
+import EditableText from "@/components/EditableText";
 import { bowlerName, type Names, type Rename } from "@/scoring";
 
 const OVER_COUNT = 20;
@@ -133,10 +133,11 @@ export default function BowlingAnalysis({
             <div className="ba-cell ba-num">{id}</div>
             <div className="ba-cell" style={{ color: bowlerColour(id) }}>
               {/* Can be named before they bowl. The default shows once they have. */}
-              <EditableName
-                name={names.bowlers[id] ?? ""}
+              <EditableText
+                value={names.bowlers[id] ?? ""}
                 shown={row.hasComeOn || names.bowlers[id] ? bowlerName(names, id) : ""}
-                onRename={(name) => onRename("bowlers", id, name)}
+                label={`Bowler ${id} name`}
+                onSave={(name) => onRename("bowlers", id, name)}
               />
             </div>
             <div className="ba-cell">{row.action}</div>

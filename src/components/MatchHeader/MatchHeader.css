@@ -1,4 +1,5 @@
 .match-header {
+  --et-font-size: 13px;  /* entries a little larger than the labels */
   --line: #7d8a86;
   --hair: #c9cfe0;
   --paper: #f4f4fb;
@@ -29,7 +30,7 @@
   border-left: 1px solid var(--line);
   padding: 4px 8px;
   display: flex;
-  align-items: center;
+  align-items: flex-end; /* labels sit on the ruled line, like a form */
   gap: 8px;
   min-width: 0;
 }
@@ -40,6 +41,8 @@
 
 /* Filled-in values sit on a ruled line so blank cells still look like a form */
 .mh-value {
+  display: flex;         /* so the click target fills the whole ruled line */
+  align-self: stretch;   /* and the whole height of the cell */
   flex: 1;
   min-width: 0;
   min-height: 1.4em;
@@ -50,7 +53,7 @@
 .mh-and { font-size: 16px; color: #555; }
 
 /* Time: the label beside two stacked Start / Finish lines, sharing the cell height */
-.mh-time { padding: 0 0 0 8px; }
+.mh-time { padding: 0 0 0 8px; align-items: center; } /* "Time" stays centred beside Start/Finish */
 .mh-stack {
   flex: 1;
   align-self: stretch;
@@ -60,7 +63,7 @@
 }
 .mh-half {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 6px;
   padding: 0 8px;
   border-left: 1px solid var(--line);

@@ -1,12 +1,18 @@
-import "./EditableName.css";
+import "./EditableText.css";
 import { useRef, useState } from "react";
 
-// A player's name in a table cell, which turns into a text box when clicked. Enter or
-// clicking away saves, and Escape cancels.
-// name: the name entered so far ("" if none). shown: what the cell shows when not editing.
-type EditableNameProps = { name: string; shown: string; onRename: (name: string) => void };
+// Text in a cell (a player's name, the venue...), which turns into a text box when clicked.
+// Enter or clicking away saves, and Escape cancels.
+// value: the text entered so far ("" if none). shown: what the cell shows when not editing
+// (defaults to value). label: what screen readers call the text box.
+type EditableTextProps = {
+  value: string;
+  shown?: string;
+  label: string;
+  onSave: (value: string) => void;
+};
 
-export default function EditableName({ name, shown, onRename }: EditableNameProps) {
+export default function EditableText({ value, shown = value, label, onSave }: EditableTextProps) {
   const [draft, setDraft] = useState<string | null>(null);
   // Enter and Escape both leave by blurring, so saving happens in one place.
   const cancelled = useRef(false);
@@ -18,9 +24,9 @@ export default function EditableName({ name, shown, onRename }: EditableNameProp
     return (
       <button
         type="button"
-        className="en-shown"
+        className="et-shown"
         onMouseDown={() => (returnFocusTo.current = document.activeElement as HTMLElement | null)}
-        onClick={() => setDraft(name)}
+        onClick={() => setDraft(value)}
       >
         {shown}
       </button>
@@ -28,9 +34,9 @@ export default function EditableName({ name, shown, onRename }: EditableNameProp
   }
   return (
     <input
-      className="en-input"
+      className="et-input"
       value={draft}
-      aria-label="name"
+      aria-label={label}
       autoFocus
       onChange={(e) => setDraft(e.target.value)}
       onKeyDown={(e) => {
@@ -41,7 +47,7 @@ export default function EditableName({ name, shown, onRename }: EditableNameProp
         }
       }}
       onBlur={() => {
-        if (!cancelled.current) onRename(draft.trim());
+        if (!cancelled.current) onSave(draft.trim());
         cancelled.current = false;
         setDraft(null);
       }}

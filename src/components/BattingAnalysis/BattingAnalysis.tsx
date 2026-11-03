@@ -2,7 +2,7 @@ import "./BattingAnalysis.css";
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { bowlerColour, renderMark } from "@/components/DeliveryMarks";
 import Clock from "@/components/Clock";
-import EditableName from "@/components/EditableName";
+import EditableText from "@/components/EditableText";
 import { batterName, bowlerName, DISMISSALS, type Names, type Rename } from "@/scoring";
 import { isDot, type BatterRow, type BattingColumn } from "./selectors";
 
@@ -127,10 +127,11 @@ export default function BattingAnalysis({
           </div>
           <div className="sc-cell">
             {/* Can be named before they come in. The default shows once they have. */}
-            <EditableName
-              name={names.batters[id] ?? ""}
+            <EditableText
+              value={names.batters[id] ?? ""}
               shown={row.hasBatted || names.batters[id] ? batterName(names, id) : ""}
-              onRename={(name) => onRename("batters", id, name)}
+              label={`Batter ${id} name`}
+              onSave={(name) => onRename("batters", id, name)}
             />
           </div>
           <Stack top={<Clock at={row.timeIn} className="sc-time" />} bottom={row.overIn} />

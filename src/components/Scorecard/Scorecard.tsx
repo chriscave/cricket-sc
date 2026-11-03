@@ -2,10 +2,10 @@ import "./Scorecard.css";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import BowlingAnalysis from "@/components/BowlingAnalysis";
 import FallOfWickets, { selectFallOfWickets } from "@/components/FallOfWickets";
-import MatchHeader from "@/components/MatchHeader";
-import MatchOfficials from "@/components/MatchOfficials";
-import MatchResult from "@/components/MatchResult";
-import NotesRemarks from "@/components/NotesRemarks";
+import MatchHeader, { type MatchHeaderValues } from "@/components/MatchHeader";
+import MatchOfficials, { type MatchOfficialsValues } from "@/components/MatchOfficials";
+import MatchResult, { type MatchResultValues } from "@/components/MatchResult";
+import NotesRemarks, { type NotesRemarksValues } from "@/components/NotesRemarks";
 import RunMilestones, { selectRunMilestones } from "@/components/RunMilestones";
 import RunTracker, { selectRunTracker } from "@/components/RunTracker";
 import BattingAnalysis, { selectBattingAnalysis } from "@/components/BattingAnalysis";
@@ -34,19 +34,29 @@ function useFitToWidth(ref: RefObject<HTMLElement | null>): number {
   return zoom;
 }
 
+// Everything the scorer writes around the sheet (match no., venue, umpires, result, notes...).
+// Each block declares its own fields; the scorecard holds them all together.
+export type MatchDetails = MatchHeaderValues &
+  MatchOfficialsValues &
+  MatchResultValues &
+  NotesRemarksValues;
+export type EditDetail = (key: keyof MatchDetails, value: string) => void;
+
 type ScorecardProps = {
   inningsState: InningsState;
   names: Names;
   onRename: Rename;
+  details: MatchDetails;
+  onEditDetail: EditDetail;
 };
 
-export default function Scorecard({ inningsState, names, onRename }: ScorecardProps) {
+export default function Scorecard({ inningsState, names, onRename, details, onEditDetail }: ScorecardProps) {
   const sheet = useRef<HTMLDivElement>(null);
   const zoom = useFitToWidth(sheet);
   return (
     <div ref={sheet} className="container" style={{ width: SHEET_WIDTH, zoom }}>
       <div className="lhs">
-        <MatchHeader />
+        <MatchHeader values={details} onEdit={onEditDetail} />
         <BattingAnalysis innings={selectBattingAnalysis(inningsState)} names={names} onRename={onRename} />
         <div className="fow-and-score">
           <FallOfWickets wickets={selectFallOfWickets(inningsState)} />
@@ -57,12 +67,12 @@ export default function Scorecard({ inningsState, names, onRename }: ScorecardPr
             <RunTracker {...selectRunTracker(inningsState)} />
           </div>
           <RunMilestones reached={selectRunMilestones(inningsState)} />
-          <MatchOfficials />
+          <MatchOfficials values={details} onEdit={onEditDetail} />
         </div>
         <BowlingAnalysis bowlers={selectBowlingsAnalysis(inningsState)} names={names} onRename={onRename} />
         <div className="result-row">
-          <MatchResult />
-          <NotesRemarks />
+          <MatchResult values={details} onEdit={onEditDetail} />
+          <NotesRemarks values={details} onEdit={onEditDetail} />
         </div>
       </div>
       <ScoringRate rates={selectScoringRate(inningsState)} />

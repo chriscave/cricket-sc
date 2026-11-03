@@ -1,4 +1,5 @@
 .match-officials {
+  --et-font-size: 13px;  /* entries a little larger than the labels */
   --line: #7d8a86;
   --hair: #c9cfe0;
   --paper: #f4f4fb;
@@ -40,6 +41,7 @@
 }
 
 .mo-field {
+  flex: 1;               /* fields share the row's height, so each line is a tall target */
   display: flex;
   align-items: flex-end;
   gap: 8px;
@@ -48,6 +50,8 @@
 
 /* The ruled line: the name sits on it, and it stays visible when empty */
 .mo-line {
+  display: flex;         /* so the click target fills the whole ruled line */
+  align-self: stretch;
   flex: 1;
   min-height: 1.4em;
   border-bottom: 1px solid var(--hair);

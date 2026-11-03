@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./App.css";
-import Scorecard from "@/components/Scorecard";
+import Scorecard, { type EditDetail, type MatchDetails } from "@/components/Scorecard";
 import CommandLine from "./components/CommandLine";
 import Dock from "@/components/Dock";
 import NextBowlers from "@/components/NextBowlers";
@@ -88,6 +88,8 @@ function App() {
   const [pendingWicket, setPendingWicket] = useState<PendingWicket | null>(null);
   const [names, setNames] = useState<Names>(NO_NAMES);
   const rename: Rename = (kind, id, name) => setNames((prev) => withName(prev, kind, id, name));
+  const [details, setDetails] = useState<MatchDetails>({});
+  const editDetail: EditDetail = (key, value) => setDetails((prev) => ({ ...prev, [key]: value }));
   const sixLegalDeliveries = hasSixLegalDeliveries(
     currentOverDeliveries(innings),
   );
@@ -126,7 +128,13 @@ function App() {
   return (
     <>
       <div className="app">
-        <Scorecard inningsState={innings} names={names} onRename={rename} />
+        <Scorecard
+          inningsState={innings}
+          names={names}
+          onRename={rename}
+          details={details}
+          onEditDetail={editDetail}
+        />
       </div>
       <Dock>
         {pendingWicket?.awaiting === "howOut" ? (

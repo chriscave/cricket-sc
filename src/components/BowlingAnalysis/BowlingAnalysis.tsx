@@ -1,8 +1,10 @@
+import { useState } from "react";
 import type { BowlerRow, Over } from "./selectors";
 import "./BowlingAnalysis.css";
 import { bowlerColour, renderMark } from "@/components/DeliveryMarks";
 import MaidenMark from "./MaidenMark";
 import EditableText from "@/components/EditableText";
+import RowToggle from "@/components/RowToggle";
 import { bowlerName, type Names, type Rename } from "@/scoring";
 
 const OVER_COUNT = 20;
@@ -100,6 +102,11 @@ function ballPosition(ball: number, ballCount: number, columns: number) {
   return { gridColumn: column, gridRow: `${(ball % 3) * 2 + 1 + offset} / span 2` };
 }
 
+// A bowler's row is open (ball by ball) or closed (one short line: name, the running
+// total under each over, and the totals). The bowlers at the two ends are always open, so
+// it's clear who's bowling, and the rest are closed. The scorer can reopen (and close
+// again) a resting bowler; that lasts until they next bowl.
+
 export type BowlingAnalysisProps = {
   bowlers: BowlerRow[];
   names: Names;
@@ -115,6 +122,15 @@ export default function BowlingAnalysis({
     { length: count },
     (_, i) => bowlers[i] ?? {},
   );
+  // The resting bowlers the scorer has reopened, with how many overs each had bowled then.
+  // Once they bowl again the count goes up, so the reopen no longer applies.
+  const [reopened, setReopened] = useState<Record<number, number>>({});
+  const oversBowled = (row: Partial<BowlerRow>) => row.oversAnalysis?.length ?? 0;
+  const toggle = (id: number, row: Partial<BowlerRow>) =>
+    setReopened((prev) => {
+      const { [id]: wasReopened, ...rest } = prev;
+      return wasReopened === oversBowled(row) ? rest : { ...rest, [id]: oversBowled(row) };
+    });
 
   return (
     <div className="bowling">
@@ -127,10 +143,18 @@ export default function BowlingAnalysis({
       {rows.map((row, i) => {
         const hasBowled = !!row.oversAnalysis?.length;
         const id = i + 1;
+        const resting = !!row.hasComeOn && !row.atAnEnd;
+        const open = !!row.atAnEnd || (resting && reopened[id] === oversBowled(row));
 
         return (
-          <div key={i} className="ba-row ba-body">
-            <div className="ba-cell ba-num">{id}</div>
+          <div key={i} className={open ? "ba-row ba-body" : "ba-row ba-body ba-closed"}>
+            <div className="ba-cell ba-num">
+              {resting ? (
+                <RowToggle id={id} open={open} what="bowler" onToggle={() => toggle(id, row)} fillBox />
+              ) : (
+                id
+              )}
+            </div>
             <div className="ba-cell" style={{ color: bowlerColour(id) }}>
               {/* Can be named before they bowl. The default shows once they have. */}
               <EditableText
@@ -140,10 +164,17 @@ export default function BowlingAnalysis({
                 onSave={(name) => onRename("bowlers", id, name)}
               />
             </div>
-            <div className="ba-cell">{row.action}</div>
+            <div className="ba-cell">{open && row.action}</div>
 
             {OVERS.map((o) => {
               const over = row.oversAnalysis?.[o];
+              // Closed: just the running total, on one line.
+              if (!open)
+                return (
+                  <div key={o} className="ba-cell ba-over-total">
+                    {runningTotal(hasBowled, over)}
+                  </div>
+                );
               const marks = over?.deliveryMarks ?? [];
               const columns = ballColumns(marks.length);
               return (

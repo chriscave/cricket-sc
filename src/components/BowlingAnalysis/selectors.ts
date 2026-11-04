@@ -1,5 +1,6 @@
 import {
   creditedToBowler,
+  otherEndBowlerId,
   type Delivery,
   type InningsState,
 } from "@/scoring";
@@ -16,6 +17,8 @@ export type Over = {
 export type BowlerRow = {
   // hasComeOn: they've bowled a ball, or they're bowling the over in progress.
   hasComeOn: boolean;
+  // atAnEnd: they're bowling the over in progress, or bowled the last one (the other end).
+  atAnEnd: boolean;
   action?: string;
   oversAnalysis: Over[];
   wds: number;
@@ -31,6 +34,7 @@ export type BowlerRow = {
 
 export function selectBowlingsAnalysis(state: InningsState): BowlerRow[] {
   const bowlers: BowlerRow[] = [];
+  const otherEnd = otherEndBowlerId(state);
   for (const [id, deliveries] of Object.entries(state.bowlers)) {
     const bowlerDeliveries = deliveries.deliveryIds.map(
       (id) => state.deliveries[id],
@@ -84,6 +88,7 @@ export function selectBowlingsAnalysis(state: InningsState): BowlerRow[] {
 
     const row: BowlerRow = {
       hasComeOn: deliveries.deliveryIds.length > 0 || state.currentBowlerId === Number(id),
+      atAnEnd: state.currentBowlerId === Number(id) || otherEnd === Number(id),
       oversAnalysis: overs,
       wds: allMarks.reduce((s, dm) => s + dm.extras.wides, 0),
       nb: allMarks.reduce((s, dm) => s + dm.extras.noBalls, 0),

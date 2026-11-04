@@ -51,6 +51,10 @@
 .sc-body .sc-num { justify-content: center; color: #8a94b0; position: relative; }
 /* In the number box's top right corner, darker than the number so it stands out. */
 .sc-strike { position: absolute; top: 2px; right: 3px; color: #444; }
+
+/* A closed row: one short line, as tall as its text (just the number until they're named) */
+.sc-body.sc-closed { min-height: 0; }
+.sc-closed .sc-cell { padding-top: 0; padding-bottom: 0; }
 /* Text written on the row's bottom line, like a figure in a ruled book. */
 .sc-body .sc-bottom { align-items: flex-end; }
 .sc-body .sc-total { justify-content: flex-end; align-items: flex-end; padding-right: 8px; }

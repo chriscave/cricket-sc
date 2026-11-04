@@ -44,7 +44,13 @@
 /* Body: rows alternate, starting with the second (header is child 1, so odd = rows 2, 4, ...) */
 .ba-body { border-bottom: 1px solid var(--hair); }
 .ba-body:nth-child(odd) { background: var(--stripe); }
-.ba-body .ba-num { align-items: flex-start; color: #8a94b0; padding-top: 4px; }
+.ba-body .ba-num { align-items: flex-start; color: #8a94b0; padding-top: 4px; position: relative; }
+
+/* A closed row: one short line, as tall as its text (just the number until they're named) */
+.ba-body.ba-closed { min-height: 0; }
+.ba-closed .ba-cell { padding-top: 0; padding-bottom: 0; }
+.ba-closed .ba-num { align-items: center; }
+.ba-over-total { justify-content: center; padding: 0 2px; font-size: 11px; }
 
 /* Over cells: ball-by-ball on top (2/3), over total below (1/3) */
 .ba-stack {

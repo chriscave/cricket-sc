@@ -1,0 +1,19 @@
+.row-toggle {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  cursor: pointer;
+}
+.row-toggle:hover { color: #444; }
+.row-toggle-chevron { font-size: 9px; }
+
+/* fillBox: the number and chevron stay where they are, with the button covering the box */
+.row-toggle-label { cursor: inherit; }
+.row-toggle-cover {
+  all: unset;
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+}
+.row-toggle-cover:hover { background: rgba(125, 138, 134, 0.15); }

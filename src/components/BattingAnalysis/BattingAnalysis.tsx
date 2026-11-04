@@ -3,6 +3,7 @@ import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { bowlerColour, renderMark } from "@/components/DeliveryMarks";
 import Clock from "@/components/Clock";
 import EditableText from "@/components/EditableText";
+import RowToggle from "@/components/RowToggle";
 import { batterName, bowlerName, DISMISSALS, type Names, type Rename } from "@/scoring";
 import { isDot, type BatterRow, type BattingColumn } from "./selectors";
 
@@ -93,6 +94,14 @@ function RunsCell({ columns, out }: { columns: BattingColumn[]; out: boolean }) 
   );
 }
 
+// A batter's row is open (everything showing) or closed (one short line: name, how out,
+// bowler and total). Batters who haven't come in are closed, the two in are open, and a
+// batter closes when they're out. The scorer can open or close anyone who has batted.
+const openByDefault = (row: Partial<BatterRow>) => !!row.hasBatted && row.howOut === undefined;
+
+// The cells a closed row leaves blank: In, Out, runs, 4s/6s, 50, 100, Min.
+const CLOSED_BLANKS = 7;
+
 // Pass real data as `innings`; empty slots render as blank scorebook lines.
 export default function BattingAnalysis({
   innings = [],
@@ -109,6 +118,16 @@ export default function BattingAnalysis({
     { length: batters },
     (_, i) => innings[i] ?? {},
   );
+  // What the scorer chose, by batter, kept only while it differs from the default. So a
+  // batter the scorer reopened while in still closes when they're out.
+  const [chosen, setChosen] = useState<Record<number, boolean>>({});
+  const isOpen = (id: number, row: Partial<BatterRow>) => chosen[id] ?? openByDefault(row);
+  const toggle = (id: number, row: Partial<BatterRow>) =>
+    setChosen((prev) => {
+      const { [id]: _, ...rest } = prev;
+      const open = !isOpen(id, row);
+      return open === openByDefault(row) ? rest : { ...rest, [id]: open };
+    });
 
   return (
     <div className="scorecard">
@@ -119,10 +138,15 @@ export default function BattingAnalysis({
       {/* Cells in order. MUST match grid-template-columns in the CSS. */}
       {rows.map((row, i) => {
         const id = i + 1;
+        const open = isOpen(id, row);
         return (
-        <div key={i} className="sc-row sc-body">
+        <div key={i} className={open ? "sc-row sc-body" : "sc-row sc-body sc-closed"}>
           <div className="sc-cell sc-num">
-            {id}
+            {row.hasBatted ? (
+              <RowToggle id={id} open={open} what="batter" onToggle={() => toggle(id, row)} />
+            ) : (
+              id
+            )}
             {row.onStrike && <span className="sc-strike" aria-label="on strike">†</span>}
           </div>
           <div className="sc-cell">
@@ -134,13 +158,19 @@ export default function BattingAnalysis({
               onSave={(name) => onRename("batters", id, name)}
             />
           </div>
-          <Stack top={<Clock at={row.timeIn} className="sc-time" />} bottom={row.overIn} />
-          <Stack top={<Clock at={row.timeOut} className="sc-time" />} bottom={row.overOut} />
-          <RunsCell columns={row.columns ?? []} out={row.howOut !== undefined} />
-          <Stack top={row.fours || undefined} bottom={row.sixes || undefined} />
-          <Stack top={row.ballsTo50} bottom={row.minutesTo50} />
-          <Stack top={row.ballsTo100} bottom={row.minutesTo100} />
-          <div className="sc-cell sc-minutes">{row.minutes}</div>
+          {open ? (
+            <>
+              <Stack top={<Clock at={row.timeIn} className="sc-time" />} bottom={row.overIn} />
+              <Stack top={<Clock at={row.timeOut} className="sc-time" />} bottom={row.overOut} />
+              <RunsCell columns={row.columns ?? []} out={row.howOut !== undefined} />
+              <Stack top={row.fours || undefined} bottom={row.sixes || undefined} />
+              <Stack top={row.ballsTo50} bottom={row.minutesTo50} />
+              <Stack top={row.ballsTo100} bottom={row.minutesTo100} />
+              <div className="sc-cell sc-minutes">{row.minutes}</div>
+            </>
+          ) : (
+            Array.from({ length: CLOSED_BLANKS }, (_, k) => <div key={k} className="sc-cell" />)
+          )}
           <div className="sc-cell sc-bottom">
             {row.howOut ? DISMISSALS[row.howOut].label : row.hasBatted && "Not Out"}
           </div>

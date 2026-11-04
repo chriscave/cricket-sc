@@ -58,6 +58,8 @@ export default function Scorecard({ inningsState, names, onRename, details, onEd
       <div className="lhs">
         <MatchHeader values={details} onEdit={onEditDetail} />
         <BattingAnalysis innings={selectBattingAnalysis(inningsState)} names={names} onRename={onRename} />
+        {/* Straight under the batting, so both fit on one screen while scoring */}
+        <BowlingAnalysis bowlers={selectBowlingsAnalysis(inningsState)} names={names} onRename={onRename} />
         <div className="fow-and-score">
           <FallOfWickets wickets={selectFallOfWickets(inningsState)} />
           <ScoreSummary {...selectScoreSummary(inningsState)} />
@@ -69,7 +71,6 @@ export default function Scorecard({ inningsState, names, onRename, details, onEd
           <RunMilestones reached={selectRunMilestones(inningsState)} />
           <MatchOfficials values={details} onEdit={onEditDetail} />
         </div>
-        <BowlingAnalysis bowlers={selectBowlingsAnalysis(inningsState)} names={names} onRename={onRename} />
         <div className="result-row">
           <MatchResult values={details} onEdit={onEditDetail} />
           <NotesRemarks values={details} onEdit={onEditDetail} />

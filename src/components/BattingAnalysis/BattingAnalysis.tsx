@@ -96,8 +96,10 @@ function RunsCell({ columns, out }: { columns: BattingColumn[]; out: boolean }) 
 
 // A batter's row is open (everything showing) or closed (one short line: name, how out,
 // bowler and total). Batters who haven't come in are closed, the two in are open, and a
-// batter closes when they're out. The scorer can open or close anyone who has batted.
-const openByDefault = (row: Partial<BatterRow>) => !!row.hasBatted && row.howOut === undefined;
+// batter closes when they're out. The two in are always open, so it's clear who's batting;
+// the scorer can reopen (and close again) a batter who's out.
+const isIn = (row: Partial<BatterRow>) => !!row.hasBatted && row.howOut === undefined;
+const isOut = (row: Partial<BatterRow>) => row.howOut !== undefined;
 
 // The cells a closed row leaves blank: In, Out, runs, 4s/6s, 50, 100, Min.
 const CLOSED_BLANKS = 7;
@@ -118,15 +120,14 @@ export default function BattingAnalysis({
     { length: batters },
     (_, i) => innings[i] ?? {},
   );
-  // What the scorer chose, by batter, kept only while it differs from the default. So a
-  // batter the scorer reopened while in still closes when they're out.
-  const [chosen, setChosen] = useState<Record<number, boolean>>({});
-  const isOpen = (id: number, row: Partial<BatterRow>) => chosen[id] ?? openByDefault(row);
-  const toggle = (id: number, row: Partial<BatterRow>) =>
-    setChosen((prev) => {
-      const { [id]: _, ...rest } = prev;
-      const open = !isOpen(id, row);
-      return open === openByDefault(row) ? rest : { ...rest, [id]: open };
+  // The batters who are out that the scorer has reopened. Out is final, so a reopen never
+  // goes stale.
+  const [reopened, setReopened] = useState<ReadonlySet<number>>(new Set());
+  const toggle = (id: number) =>
+    setReopened((prev) => {
+      const next = new Set(prev);
+      if (!next.delete(id)) next.add(id);
+      return next;
     });
 
   return (
@@ -138,12 +139,12 @@ export default function BattingAnalysis({
       {/* Cells in order. MUST match grid-template-columns in the CSS. */}
       {rows.map((row, i) => {
         const id = i + 1;
-        const open = isOpen(id, row);
+        const open = isIn(row) || (isOut(row) && reopened.has(id));
         return (
         <div key={i} className={open ? "sc-row sc-body" : "sc-row sc-body sc-closed"}>
           <div className="sc-cell sc-num">
-            {row.hasBatted ? (
-              <RowToggle id={id} open={open} what="batter" onToggle={() => toggle(id, row)} />
+            {isOut(row) ? (
+              <RowToggle id={id} open={open} what="batter" onToggle={() => toggle(id)} />
             ) : (
               id
             )}

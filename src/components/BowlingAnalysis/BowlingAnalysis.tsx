@@ -150,7 +150,7 @@ export default function BowlingAnalysis({
           <div key={i} className={open ? "ba-row ba-body" : "ba-row ba-body ba-closed"}>
             <div className="ba-cell ba-num">
               {resting ? (
-                <RowToggle id={id} open={open} what="bowler" onToggle={() => toggle(id, row)} fillBox />
+                <RowToggle id={id} open={open} what="bowler" onToggle={() => toggle(id, row)} />
               ) : (
                 id
               )}

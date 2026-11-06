@@ -1,15 +1,11 @@
-.row-toggle {
-  all: unset;
+.row-toggle-label {
   display: flex;
   align-items: center;
   gap: 1px;
-  cursor: pointer;
 }
-.row-toggle:hover { color: #444; }
 .row-toggle-chevron { font-size: 9px; }
 
-/* fillBox: the number and chevron stay where they are, with the button covering the box */
-.row-toggle-label { cursor: inherit; }
+/* The number and chevron stay where they are, with the button covering the whole box */
 .row-toggle-cover {
   all: unset;
   position: absolute;

@@ -3,7 +3,8 @@
   --hair: #c9cfe0;
   --stripe: #dfe5e3;
   --paper: #f4f4fb;
-  --row-h: 22px;
+  --row-h: 15px; /* below the left side's height even with every row closed, so the
+                    rate rows stretch to fit it rather than the left side stretching */
 
   /* One template for everything. The header group and every row inherit it via subgrid. */
   display: inline-grid;

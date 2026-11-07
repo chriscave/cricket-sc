@@ -30,3 +30,17 @@
   color: var(--dock-fg);
   opacity: 0.5;
 }
+
+/* The slash-command menu, above the command line while a "/" command is being typed.
+   The command line's colours swapped, like the dock's other panels. */
+.cl-menu {
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  background: var(--dock-fg);
+  color: var(--dock-bg);
+}
+.cl-menu li { display: flex; gap: 16px; padding: 2px 12px; }
+.cl-menu li.selected { background: var(--dock-bg); color: var(--dock-fg); }
+.cl-menu-name { flex: 0 0 16ch; } /* names in one column, descriptions lined up after */
+.cl-menu-desc { opacity: 0.8; }

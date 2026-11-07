@@ -12,7 +12,7 @@
     minmax(140px, 1.2fr) /* batsman */
     34px 34px /* in / out */
     minmax(240px, 4fr)   /* runs, wide ruled area */
-    28px      /* 4s/6s */
+    36px      /* 4s/6s (wide enough for "12/13" in a closed row) */
     50px 50px /* balls/min 50, 100 */
     32px      /* minutes batted */
     minmax(90px, 1fr)    /* how out */
@@ -55,6 +55,14 @@
 /* A closed row: one short line, as tall as its text (just the number until they're named) */
 .sc-body.sc-closed { min-height: 0; }
 .sc-closed .sc-cell { padding-top: 0; padding-bottom: 0; }
+/* A closed row is one line: no line between halves, and the // stays on its line
+   instead of hanging over the row below */
+.sc-closed .sc-runs { background: none; }
+.sc-closed .sc-out-both svg { height: 100%; }
+/* A closed row's figures, centred and on the bottom line like How out and Total */
+.sc-closed-value { justify-content: center; align-items: flex-end; white-space: nowrap; }
+/* Without side padding, "12/13" fits the 4s/6s column with a little room either side */
+.sc-closed-tight { padding-left: 0; padding-right: 0; }
 /* Text written on the row's bottom line, like a figure in a ruled book. */
 .sc-body .sc-bottom { align-items: flex-end; }
 .sc-body .sc-total { justify-content: flex-end; align-items: flex-end; padding-right: 8px; }

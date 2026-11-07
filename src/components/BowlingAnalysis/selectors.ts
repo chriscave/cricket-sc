@@ -12,6 +12,9 @@ export type Over = {
   cumWickets: number;
   complete: boolean;
   maiden: boolean;
+  // endsSpell: the last over of a spell. Someone else has the next over from this end
+  // (two overs on), including when that over has only just started.
+  endsSpell: boolean;
 };
 
 export type BowlerRow = {
@@ -35,6 +38,12 @@ export type BowlerRow = {
 export function selectBowlingsAnalysis(state: InningsState): BowlerRow[] {
   const bowlers: BowlerRow[] = [];
   const otherEnd = otherEndBowlerId(state);
+  // Who bowled (or is bowling) each match over. The over in progress may not have a ball
+  // yet, so its bowler comes from the state.
+  const bowlerOfOver = new Map<number, number>(
+    state.deliveries.map((d) => [d.overNumber, d.bowlerId]),
+  );
+  bowlerOfOver.set(state.overNumber, state.currentBowlerId);
   for (const [id, deliveries] of Object.entries(state.bowlers)) {
     const bowlerDeliveries = deliveries.deliveryIds.map(
       (id) => state.deliveries[id],
@@ -64,6 +73,7 @@ export function selectBowlingsAnalysis(state: InningsState): BowlerRow[] {
       ).length;
 
       const complete = overBalls[0].overNumber < state.overNumber;
+      const nextFromThisEnd = bowlerOfOver.get(overBalls[0].overNumber + 2);
       const over: Over = {
         deliveryMarks,
         cumRuns: (previousOver?.cumRuns ?? 0) + bowlerOverRuns,
@@ -75,6 +85,7 @@ export function selectBowlingsAnalysis(state: InningsState): BowlerRow[] {
             (dm) =>
               dm.batRuns + dm.extras.wides + dm.extras.noBalls === 0,
           ),
+        endsSpell: nextFromThisEnd !== undefined && nextFromThisEnd !== Number(id),
       };
       overs.push(over);
     }

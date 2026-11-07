@@ -5,7 +5,7 @@ import Clock from "@/components/Clock";
 import EditableText from "@/components/EditableText";
 import RowToggle from "@/components/RowToggle";
 import { batterName, bowlerName, DISMISSALS, type Names, type Rename } from "@/scoring";
-import { isDot, type BatterRow, type BattingColumn } from "./selectors";
+import { battingColumns, isDot, type BatterRow, type BattingColumn } from "./selectors";
 
 // Header cells, one per column, except grouped ones that span several.
 //   subs:  a label on top with sub-labels underneath, one per spanned column
@@ -101,8 +101,16 @@ function RunsCell({ columns, out }: { columns: BattingColumn[]; out: boolean }) 
 const isIn = (row: Partial<BatterRow>) => !!row.hasBatted && row.howOut === undefined;
 const isOut = (row: Partial<BatterRow>) => row.howOut !== undefined;
 
-// The cells a closed row leaves blank: In, Out, runs, 4s/6s, 50, 100, Min.
-const CLOSED_BLANKS = 7;
+// A closed row's runs: every mark except dots, packed 2 to a column as in an open row,
+// on one line (half an open row's height), then the // if they're out.
+const withoutDots = (columns: BattingColumn[] = []) =>
+  battingColumns(columns.flat().filter((mark) => !isDot(mark)));
+
+// A closed row writes an open row's stacked pairs on one line: "4/1" for 4s and 6s
+// (blank if neither), and balls/minutes for a 50 or 100 (blank until reached).
+const boundaries = (fours = 0, sixes = 0) => (fours || sixes ? `${fours}/${sixes}` : "");
+const milestone = (balls?: number, minutes?: number) =>
+  balls === undefined ? "" : `${balls}/${minutes}`;
 
 // Pass real data as `innings`; empty slots render as blank scorebook lines.
 export default function BattingAnalysis({
@@ -170,10 +178,26 @@ export default function BattingAnalysis({
               <div className="sc-cell sc-minutes">{row.minutes}</div>
             </>
           ) : (
-            Array.from({ length: CLOSED_BLANKS }, (_, k) => <div key={k} className="sc-cell" />)
+            // Closed: one line, times only (no overs), pairs written with a /.
+            <>
+              <div className="sc-cell sc-closed-value">
+                <Clock at={row.timeIn} className="sc-time" />
+              </div>
+              <div className="sc-cell sc-closed-value">
+                <Clock at={row.timeOut} className="sc-time" />
+              </div>
+              <RunsCell columns={withoutDots(row.columns)} out={row.howOut !== undefined} />
+              <div className="sc-cell sc-closed-value sc-closed-tight">
+                {boundaries(row.fours, row.sixes)}
+              </div>
+              <div className="sc-cell sc-closed-value">{milestone(row.ballsTo50, row.minutesTo50)}</div>
+              <div className="sc-cell sc-closed-value">{milestone(row.ballsTo100, row.minutesTo100)}</div>
+              <div className="sc-cell sc-minutes">{row.minutes}</div>
+            </>
           )}
           <div className="sc-cell sc-bottom">
-            {row.howOut ? DISMISSALS[row.howOut].label : row.hasBatted && "Not Out"}
+            {/* Blank until they're out. "Not out" will be written in at the end of the innings. */}
+            {row.howOut && DISMISSALS[row.howOut].label}
           </div>
           <div
             className="sc-cell sc-bottom"

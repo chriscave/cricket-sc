@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import type { BowlerRow, Over } from "./selectors";
 import "./BowlingAnalysis.css";
 import { bowlerColour, renderMark } from "@/components/DeliveryMarks";
@@ -147,7 +147,11 @@ export default function BowlingAnalysis({
         const open = !!row.atAnEnd || (resting && reopened[id] === oversBowled(row));
 
         return (
-          <div key={i} className={open ? "ba-row ba-body" : "ba-row ba-body ba-closed"}>
+          <div
+            key={i}
+            className={open ? "ba-row ba-body" : "ba-row ba-body ba-closed"}
+            style={{ "--bowler-colour": bowlerColour(id) } as CSSProperties}
+          >
             <div className="ba-cell ba-num">
               {resting ? (
                 <RowToggle id={id} open={open} what="bowler" onToggle={() => toggle(id, row)} />
@@ -155,7 +159,7 @@ export default function BowlingAnalysis({
                 id
               )}
             </div>
-            <div className="ba-cell" style={{ color: bowlerColour(id) }}>
+            <div className="ba-cell">
               {/* Can be named before they bowl. The default shows once they have. */}
               <EditableText
                 value={names.bowlers[id] ?? ""}
@@ -168,23 +172,24 @@ export default function BowlingAnalysis({
 
             {OVERS.map((o) => {
               const over = row.oversAnalysis?.[o];
+              // A thick line in the bowler's colour after the last over of a spell, open or closed.
+              const spellEnd = over?.endsSpell ? " ba-spell-end" : "";
               // Closed: just the running total, on one line.
               if (!open)
                 return (
-                  <div key={o} className="ba-cell ba-over-total">
+                  <div key={o} className={"ba-cell ba-over-total" + spellEnd}>
                     {runningTotal(hasBowled, over)}
                   </div>
                 );
               const marks = over?.deliveryMarks ?? [];
               const columns = ballColumns(marks.length);
               return (
-              <div key={o} className="ba-cell ba-stack">
+              <div key={o} className={"ba-cell ba-stack" + spellEnd}>
                 <div
                   className="ba-half ba-balls"
                   style={{
                     gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
                     fontSize: ballFontSize(columns),
-                    color: bowlerColour(id),
                   }}
                 >
                   {over?.maiden && <MaidenMark marks={marks} />}

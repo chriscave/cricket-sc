@@ -33,6 +33,9 @@ export type BowlerRow = {
   runs: number;
   wkts: number;
   avrge?: number;
+  // econ: runs per over, from completed overs only (the over in progress isn't counted).
+  // Undefined until they've completed an over.
+  econ?: number;
 };
 
 export function selectBowlingsAnalysis(state: InningsState): BowlerRow[] {
@@ -96,6 +99,8 @@ export function selectBowlingsAnalysis(state: InningsState): BowlerRow[] {
     const avrge = wkts > 0 ? runs / wkts : undefined;
     const allMarks = overs.flatMap((o) => o.deliveryMarks);
     const currentOver = overs.find((o) => !o.complete);
+    const completedOvers = overs.filter((o) => o.complete).length;
+    const lastCompleted = overs.findLast((o) => o.complete);
 
     const row: BowlerRow = {
       hasComeOn: deliveries.deliveryIds.length > 0 || state.currentBowlerId === Number(id),
@@ -103,13 +108,14 @@ export function selectBowlingsAnalysis(state: InningsState): BowlerRow[] {
       oversAnalysis: overs,
       wds: allMarks.reduce((s, dm) => s + dm.extras.wides, 0),
       nb: allMarks.reduce((s, dm) => s + dm.extras.noBalls, 0),
-      completedOvers: overs.filter((o) => o.complete).length,
+      completedOvers,
       deliveriesInCurrentOver:
         currentOver?.deliveryMarks.filter((dm) => dm.isLegal).length ?? 0,
       mdns: overs.filter((over) => over.maiden).length,
       runs,
       wkts,
       avrge,
+      econ: lastCompleted && lastCompleted.cumRuns / completedOvers,
     };
     bowlers.push(row);
   }

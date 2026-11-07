@@ -9,7 +9,7 @@ import { bowlerName, type Names, type Rename } from "@/scoring";
 
 const OVER_COUNT = 20;
 const OVERS = Array.from({ length: OVER_COUNT }, (_, i) => i);
-type TotalKey = "wds" | "nb" | "overs" | "mdns" | "runs" | "wkts" | "avrge";
+type TotalKey = "wds" | "nb" | "overs" | "mdns" | "runs" | "wkts" | "avrge" | "econ";
 const TOTALS: [TotalKey, string][] = [
   ["wds", "WDS"],
   ["nb", "NB"],
@@ -18,6 +18,7 @@ const TOTALS: [TotalKey, string][] = [
   ["runs", "Runs"],
   ["wkts", "Wkts"],
   ["avrge", "Avrge"],
+  ["econ", "Econ"],
 ];
 
 // Header cells. Groups span several columns and are subgrids (see the CSS), so their
@@ -68,7 +69,7 @@ function totalCell(
     return formatOvers(row.completedOvers, row.deliveriesInCurrentOver);
   const value = row[key];
   if ((key === "wds" || key === "nb") && value === 0) return "";
-  if (key === "avrge" && value != null) return value.toFixed(2);
+  if ((key === "avrge" || key === "econ") && value != null) return value.toFixed(2);
   return value == null ? "" : String(value);
 }
 
@@ -207,7 +208,7 @@ export default function BowlingAnalysis({
             })}
 
             {TOTALS.map(([key]) => (
-              <div key={key} className="ba-cell">
+              <div key={key} className="ba-cell ba-total">
                 {totalCell(row, key, hasBowled)}
               </div>
             ))}

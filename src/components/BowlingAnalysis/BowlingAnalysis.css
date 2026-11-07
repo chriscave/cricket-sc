@@ -13,7 +13,7 @@
     48px                        /* bowl. action */
     repeat(20, minmax(26px, 1fr)) /* overs 1-20 */
     22px 22px                   /* wds, nb (half width) */
-    repeat(5, 44px);            /* overs mdns runs wkts avrge */
+    repeat(6, 44px);            /* overs mdns runs wkts avrge econ */
   background: var(--paper);
   border: 1px solid var(--line);
   font: 12px/1.2 system-ui, sans-serif;
@@ -53,6 +53,8 @@
 .ba-closed .ba-cell { padding-top: 0; padding-bottom: 0; }
 .ba-closed .ba-num { align-items: center; }
 .ba-over-total { justify-content: center; padding: 0 2px; font-size: 11px; }
+/* The totals are written on the row's bottom line, right-aligned like figures in a book */
+.ba-total { justify-content: flex-end; align-items: flex-end; }
 
 /* The end of a spell: a thick line in the bowler's colour over the line after their last
    over. The grey line is the next cell's 1px left border, so this 3px strip is centred

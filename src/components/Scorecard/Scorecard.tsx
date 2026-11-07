@@ -66,7 +66,7 @@ export default function Scorecard({ inningsState, names, onRename, details, onEd
         </div>
         <div className="tracker-row">
           <div className="grow">
-            <RunTracker {...selectRunTracker(inningsState)} />
+            <ScoringRate rates={selectScoringRate(inningsState)} />
           </div>
           <RunMilestones reached={selectRunMilestones(inningsState)} />
           <MatchOfficials values={details} onEdit={onEditDetail} />
@@ -76,7 +76,10 @@ export default function Scorecard({ inningsState, names, onRename, details, onEd
           <NotesRemarks values={details} onEdit={onEditDetail} />
         </div>
       </div>
-      <ScoringRate rates={selectScoringRate(inningsState)} />
+      {/* The run tracker runs down the right-hand side, 10 runs to a row */}
+      <div className="rhs">
+        <RunTracker {...selectRunTracker(inningsState)} />
+      </div>
     </div>
   );
 }

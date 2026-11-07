@@ -3,9 +3,9 @@ import type { CSSProperties } from "react";
 import { bowlerColour, DotMark } from "@/components/DeliveryMarks";
 import type { RunTrackerData } from "./selectors";
 
-// 10 rows of 40 numbers.
-const TOTAL = 400;
-const COLUMNS = 40;
+// 50 rows of 10 numbers (1-10, 11-20, ...), down the right-hand side of the sheet.
+const TOTAL = 500;
+const COLUMNS = 10;
 
 // A stroke's line and brackets in its bowler's colour, slightly see-through so the number
 // still shows through.

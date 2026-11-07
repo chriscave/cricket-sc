@@ -26,7 +26,12 @@
   min-width: 0;                                 /* let it shrink instead of overflowing */
   display: flex;                                /* so its child can fill the height */
 }
-.tracker-row > .grow > * { flex: 1; }           /* the tracker fills the wrapper */
+.tracker-row > .grow > * { flex: 1; }           /* the scoring rate fills the wrapper */
+
+/* The right-hand column (the run tracker): as wide as the old scoring rate, and as tall
+   as the left side, which it stretches to fill */
+.rhs { flex: 0 0 218px; display: flex; }
+.rhs > * { flex: 1; }
 
 .result-row { display: flex; }
 .result-row > * { min-width: 0; }

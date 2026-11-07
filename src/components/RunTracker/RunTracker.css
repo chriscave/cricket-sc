@@ -11,10 +11,10 @@
   grid-template-rows: repeat(var(--rows), minmax(var(--row-h), 1fr));
   box-sizing: border-box;
   min-width: 0;
-  padding: 6px 10px;
+  padding: 6px; /* narrow sides, so 10 numbers fit the column at 20px each */
   background: var(--paper);
   border: 1px solid var(--line);
-  font: 10px/1 system-ui, sans-serif;
+  font: 9px/1 system-ui, sans-serif; /* so 3-digit numbers keep a gap between brackets */
   font-variant-numeric: tabular-nums;
   color: #444;
 }
